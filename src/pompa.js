@@ -1,57 +1,28 @@
-import { println, EmptyTemplate } from 'utils';
+/* todo
+	* complete weaved classes methods
+	* comments
+	* set up Router
+	* create route, route model & page dump configurators
+	* create radio between data source and collections
+		- create data source transformer (local or GET req for .csv & .json)
+	* create data source configurator
+	* create collection/data source API configurator
+		- update page generateHTML to add form handlers
+	* integrate Handlebars.js
+		- update PageContainer 'parseTemplate' method & Page generateHTML
 
-const fs = require('fs');
-const $ = require('cheerio');
+	* internal sanity and integrity validation checks
+	* api sanity checks + configurator
+	* unified error handling
 
-class PageTemplate {
-	constructor(TemplatePath, Model) {
-		this.asyncFileRead = "";
-		this.templateString = EmptyTemplate();
-		this.model = {};
-		this.modelBoiler = {};
-		this.requiredProperties = [];
+	* make a boilerplate that runs off a config file - so users do not have to write any js
+		* general config file
+		* route model-to-data source config file
+	* create ssh script that initializes empty project
 
-		if (typeof TemplatePath == "string")
-			this.setTemplate(TemplatePath);
-		if (typeof Model == "object")
-			this.setModel(Model);
-	}
+	* documentation readme
+	* documentation npmjs
+	* documentation website
 
-	setTemplate(path) {
-		try {
-			$this = this;
-			$this.asyncFileRead = path;
-
-			fs.readFile(path, "utf-8", (err, template) => {
-				if (err) throw err;
-				if ($this.asyncFileRead != path)
-					return;
-
-				$this.asyncFileRead = "";
-				$this.templateString = template;
-				$this.parseTemplate();
-			});
-		} catch(e) {
-			if (this.asyncFileRead == path)
-				this.asyncFileRead = "";
-			println("Error. Invalid filepath: " + TemplatePath);
-			console.log(e.stack);
-		}
-	}
-
-	setModel(model) {
-		var required = this.requiredProperties;
-		for (prop in model) {
-			if (required.indexOf(prop) > -1) {
-				this.model[prop] = model[prop];
-			} else {
-				this.modelBoiler[prop] = model[prop];
-			};
-		}
-	}
-
-	parseTemplate() {
-		let props = [];
-
-	}
-}
+	* feedback and iterations!
+*/
