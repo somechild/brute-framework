@@ -11,7 +11,7 @@ class Route {
 		this._id = uuid();
 
 		const model = new DataModel(design, this);
-		const pageContainer = new PageContainer(templatePath, model);
+		const pageContainer = new PageContainer(templatePath);
 
 		this.model = model.getId();
 		this.pageContainer = pageContainer.getId(); 
@@ -31,5 +31,13 @@ class Route {
 			newPath = pageCont.getTemplatePath();
 		}
 		pageCont.setTemplate(newPath);
+	}
+
+	getModel() {
+		return this.model;
+	}
+
+	getFile() {
+		
 	}
 }

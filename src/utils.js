@@ -27,8 +27,15 @@ export function getSafe(o, str, executeOnSuccess) {
 		if (!(prop in runner)) return;
 		runner = runner[prop];
 	};
-	if (executeOnSuccess) {
-		return executeOnSuccess(runner);
-	};
+	if (executeOnSuccess) return executeOnSuccess(runner);
 	return runner;
 }
+
+export class CollectionQuerier {
+	with() {
+
+	}
+	find() {
+		
+	}
+};

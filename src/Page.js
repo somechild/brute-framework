@@ -1,3 +1,5 @@
+const uuid = require('uuid');
+
 class Page {
 	constructor(data, pattern) {
 		

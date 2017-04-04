@@ -5,18 +5,14 @@ const fs = require('fs');
 const cheers = require('cheerio');
 
 class PageContainer {
-	constructor(templatePath, model) {
+	constructor(templatePath) {
 		this._id = uuid();
 		this.asyncFileRead = "";
 		this.templateString = EmptyTemplate();
-		this.model = null;
-		this.requiredProperties = [];
 		this.pages = new Map();
 
 		if (typeof templatePath == "string")
 			this.setTemplate(templatePath);
-		if (model instanceof DataModel)
-			this.setModel(model);
 	}
 
 	setTemplate(path) {
@@ -30,7 +26,6 @@ class PageContainer {
 				this.asyncFileRead = "";
 				this.templateString = template;
 				this.templatePath = path;
-				this.parseTemplate();
 			});
 		} catch(e) {
 			if (this.asyncFileRead == path)
@@ -40,38 +35,20 @@ class PageContainer {
 		}
 	}
 
-	setModel(model) {
-		if (!(model instanceof DataModel)) return this;
-		var required = this.requiredProperties;
-		for (var i = 0; i < required.length; i++) {
-			if (!(required[i] in model)) return this; // throw error
-		};
-		this.model = model.getId();
-		return this;
-	}
-
-	parseTemplate() {
-		let props = [];
-		let $ = cheers.load(this.templateString);
-		$('handle').each((i, elem) => props.push($(elem).attr('prop')));
-		this.requiredProps = props;
-		return this;
-	}
-
 	getPage(pattern) {
-		return this.pages.get(pattern);
+		return this.pages.get(pattern.stringify());
 	}
 
 	getPageWithData(pattern, data) {
-		let page = this.pages.get(pattern);
+		let page = this.pages.get(pattern.stringify());
 		if (!page)
-			return this.createPage(data, pattern);
+			return this.createPage(data, pattern.stringify());
 		page.recomputeData(data);
 		return page;
 	}
 
 	createPage(data, pattern) {
-		let page = new Page(data, pattern, this._id);
+		let page = new Page(data, pattern.striginify(), this._id);
 		this.pages.push(page);
 		return page;
 	}
