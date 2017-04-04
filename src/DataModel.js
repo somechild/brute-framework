@@ -36,7 +36,7 @@ class DataModel {
 
 		for (sectionName in design) {
 			const section = design[sectionName];
-			const query = {};
+			let query = {};
 			query[section.uniqueByItem] = section.matchPattern || pattern[section.endpoint];
 			const matches = querier.with(section.collection).find(query);
 			if (!matches)
