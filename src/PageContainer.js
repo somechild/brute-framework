@@ -21,6 +21,7 @@ class PageContainer {
 
 	setTemplate(path) {
 		try {
+			if (!fs.existsSync(path)) throw new Error('File does not exist.');
 			this.asyncFileRead = path;
 			fs.readFile(path, "utf-8", (err, template) => {
 				if (err) throw err;
@@ -28,6 +29,7 @@ class PageContainer {
 
 				this.asyncFileRead = "";
 				this.templateString = template;
+				this.templatePath = path;
 				this.parseTemplate();
 			});
 		} catch(e) {
@@ -61,7 +63,7 @@ class PageContainer {
 	}
 
 	getPageWithData(pattern, data) {
-		var page = this.pages.get(pattern);
+		let page = this.pages.get(pattern);
 		if (!page)
 			return this.createPage(data, pattern);
 		page.recomputeData(data);
@@ -69,8 +71,12 @@ class PageContainer {
 	}
 
 	createPage(data, pattern) {
-		var page = new Page(data, pattern, this._id);
+		let page = new Page(data, pattern, this._id);
 		this.pages.push(page);
 		return page;
+	}
+
+	getTemplatePath() {
+		return this.templatePath;
 	}
 }

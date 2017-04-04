@@ -1,7 +1,6 @@
 /* todo
 	* complete weaved classes methods
 	* comments
-	* set up Router
 	* create route, route model & page dump configurators
 	* create radio between data source and collections
 		- create data source transformer (local or GET req for .csv & .json)

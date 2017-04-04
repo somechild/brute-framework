@@ -34,6 +34,14 @@ class CollectionEntry {
 		
 	}
 
+	data() {
+
+	}
+
+	parent() {
+		
+	}
+
 	getId() {
 		
 	}

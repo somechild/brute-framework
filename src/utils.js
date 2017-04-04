@@ -13,3 +13,22 @@ export function findByProp(arr, prop, val, getIndex) {
 	};
 	return getIndex && -1;
 }
+
+export function weaveQuery(className, classId) {
+	return getSafe(global, `bruteframework.weaveClasses.${className}`, (classInstancesMap) => {
+		return classInstancesMap.get(classId);
+	});
+}
+
+export function getSafe(o, str, executeOnSuccess) {
+	let runner = o;
+	const props = str.split('.');
+	for (const prop of props) {
+		if (!(prop in runner)) return;
+		runner = runner[prop];
+	};
+	if (executeOnSuccess) {
+		return executeOnSuccess(runner);
+	};
+	return runner;
+}
