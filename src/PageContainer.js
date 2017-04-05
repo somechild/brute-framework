@@ -1,4 +1,4 @@
-import { println, EmptyTemplate } from 'utils';
+import { println, DefaultTemplates } from 'utils';
 
 const uuid = require('uuid');
 const fs = require('fs');
@@ -7,8 +7,6 @@ const cheers = require('cheerio');
 class PageContainer {
 	constructor(templatePath) {
 		this._id = uuid();
-		this.asyncFileRead = "";
-		this.templateString = EmptyTemplate();
 		this.pages = new Map();
 
 		if (typeof templatePath == "string")
@@ -16,23 +14,8 @@ class PageContainer {
 	}
 
 	setTemplate(path) {
-		try {
-			if (!fs.existsSync(path)) throw new Error('File does not exist.');
-			this.asyncFileRead = path;
-			fs.readFile(path, "utf-8", (err, template) => {
-				if (err) throw err;
-				if (this.asyncFileRead != path) return this;
-
-				this.asyncFileRead = "";
-				this.templateString = template;
-				this.templatePath = path;
-			});
-		} catch(e) {
-			if (this.asyncFileRead == path)
-				this.asyncFileRead = "";
-			println("Error. Invalid filepath: " + TemplatePath);
-			console.log(e.stack);
-		}
+		if (!fs.existsSync(path)) throw new Error(`File does not exist at ${path}`);
+		this.templatePath = path;
 	}
 
 	getPage(pattern) {
@@ -42,15 +25,25 @@ class PageContainer {
 	getPageWithData(pattern, data) {
 		let page = this.pages.get(pattern.stringify());
 		if (!page)
-			return this.createPage(data, pattern.stringify());
+			return this.createPage(data, pattern);
 		page.recomputeData(data);
 		return page;
 	}
 
 	createPage(data, pattern) {
-		let page = new Page(data, pattern.striginify(), this._id);
-		this.pages.push(page);
+		let page = new Page(data, pattern, this._id);
+		this.pages.set(pattern.stringify(), page);
 		return page;
+	}
+
+	getTemplate() {
+		try {
+			return fs.readFileSync(this.getTemplatePath(), 'utf-8');
+		} catch(e) {
+			console.log(e.stack);
+			console.log(e.message);
+			return DefaultTemplates.hasError();
+		}
 	}
 
 	getTemplatePath() {

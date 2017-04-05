@@ -4,7 +4,7 @@ class Design {
 	}
 
 
-	static validate() {
+	static validate(o) {
 
 	}
 
@@ -20,7 +20,7 @@ class Pattern {
 
 	}
 
-	static validate() {
+	static validate(o) {
 
 	}
 

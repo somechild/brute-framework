@@ -15,7 +15,11 @@ class Collection {
 
 	}
 
-	find(queryObj) {
+	findOne(matchObj) {
+
+	}
+
+	findAll() {
 
 	}
 
