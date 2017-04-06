@@ -12,7 +12,7 @@ class Page {
 
 		this._id = uuid();
 
-		// create file
+		// TODO: create file
 	}
 
 	recomputeData(data) {
@@ -36,8 +36,8 @@ class Page {
 		filePath += this.getId() + ".html";
 		if (this.contextHasChanged || fs.existsSync(filePath)) {
 			let template = weaveQuery('PageContainer', this.getContainerId()).getTemplate();
-			// load in data to filePath using cheerio
-			// write file
+			// TODO: load in data to filePath using cheerio
+			// TODO: write file
 			this.contextHasChanged = false;
 		};
 
