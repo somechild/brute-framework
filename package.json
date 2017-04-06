@@ -12,7 +12,7 @@
     "url": "git+https://github.com/somechild/brute-framework.git"
   },
   "author": "Jay Patel <jayp1924@gmail.com>",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/somechild/brute-framework/issues"
   },

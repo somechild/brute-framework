@@ -1,105 +1,168 @@
 import { easymerge } from 'utils';
 
 export default class ExpressionEvaluator {
-		/** public methods **/
+	/** public methods **/
 
-		static simple(expr, key, collectionContext) {
-			let expression = expr.split('||');
-			let isAnd;
-			if (expression.length == 1) {
-				expression = expression[0].split('&&');
-				isAnd = true;
-			};
-			let toRet = [];
-			for(let matchItem of expression) {
-				const entry = collectionContext.findOne({ [key]: matchItem });
-				if (typeof entry != undefined) {
-					toRet.push(entry);
-					if (!isAnd) return toRet;
+	/**
+	 * evaluate an expression string and search against a property in a collection
+	 * @param expr: String - user defined expression to match against
+	 * @param matchKey: String - key/property to match expression against
+	 * @param collectionContext: Collection - collection with matchKey to search expression in
+	 * @return Array of results
+	 */
+	static evaluate(expr, matchKey, collectionContext) {
+		let parsedExpr = this.parseBrackets(expr);
+		if (typeof parsedExpr == "string") return this.simple(parsedExpr);
+		return this.compoundEvalLoop(parsedExpr, matchKey, collectionContext);
+	}
+
+	/** private methods **/
+
+	/**
+	 * evaluate an expression with no brackets
+	 * @param expr: String - simple expression
+	 * @param key: String - key to match expression against
+	 * @param collectionContext: Collection - collection to search in
+	 * @return Array with result of expression searched in collection 
+	 */
+	static simple(expr, key, collectionContext) {  //TODO: change returned to use a wrapper instance rather than array primitive
+		let breakdown = [], tempstr = "";
+		for (var i = 0; i < expr.length; i++) {
+			if ((expr[i] == '&' || expr[i] == '|' || expr[i] == '^') && expr[i] == expr[i+1]) {
+				if (tempstr.length) {
+					breakdown.push(tempstr);
+					tempstr = "";
 				};
-			}
-			return toRet;
-		}
-		static compound(expr, key, collectionContext) {
-			return this.compoundEvalLoop(this.parseBrackets(expr), key, collectionContext);
-		}
-
-
-
-		/** private methods **/
-
-		static compoundEvalLoop(parsedExpression, key, collectionContext) {
-			let evaluated = [];
-			for (let item of parsedExpression) {
-				if (evaluated.length == 3)
-					this.collapseLogic(evaluated);
-
-				if (typeof item == "string") {
-					if (item == "&&" || item == "||") {
-						evaluated.push(item);
-					} else {
-						evaluated.push(this.simple(item, key, collectionContext));
-					};
-				} else { // it's an array
-					evaluated.push(this.compoundEvalLoop(item, key, collectionContext));
-				};
-			}
-
-			if (evaluated.length == 3)
-					this.collapseLogic(evaluated);
-			return evaluated;
-		}
-		static collapseLogic(logicArray) {
-			let collapsed;
-			if (logicArray[1] == '||') {
-				collapsed = [(logicArray[0] || logicArray[2])];
+				breakdown.push(expr[i] + expr[i+1]);
+				i++;
 			} else {
-				collapsed = [easymerge(logicArray[0], logicArray[1])];
+				tempstr += expr[i];
 			};
-			return collapsed;
+		};
+
+		if (tempstr.length) { // this should always be true
+			breakdown.push(tempstr);
+			tempstr = "";
+		} else {
+			throw new Error(`Invalid! Expression ends in logical operator: ${expr}`);
+		};
+
+		let toRet = [];
+		for (let item of breakdown) {
+			if (item != '&&' && item != '||' && item != '^^') {
+				const entry = collectionContext.findOne({ [key]: item });
+				toRet.push(entry && [entry]);
+			} else {
+				toRet.push(item)
+			};
+
+			if (toRet.length == 3) {
+				toRet = this.collapseLogic(toRet);
+			};
 		}
-		static parseBrackets(str) {
-			let parsedResult = this.parseShallowBrackets(str);
-			if (typeof parsedResult == "string") return str;
-			for (let i = 0; i < parsedResult.length; i++) {
-				if (Array.isArray(parsedResult[i])) {
-					parsedResult[i] = this.parseBrackets(parsedResult[i][0]);
+		if (toRet.length == 3) return this.collapseLogic(toRet);
+		return toRet;
+	}
+
+	/**
+	 * loop to recursively evaluate an expression broken down into arrays and sub-arrays
+	 * @param parsedExpression: Array - string expression with brackets broken down into arrays and sub-arrays
+	 * @param key: key to match expression against
+	 * @param collectionContext: collection to search in
+	 * @return Array with results of expression evaluated and searched within collection
+	 */
+	static compoundEvalLoop(parsedExpression, key, collectionContext) {
+		let evaluated = [];
+		for (let item of parsedExpression) {
+			if (evaluated.length == 3) {
+				evaluated = this.collapseLogic(evaluated);
+			};
+
+			if (typeof item == "string") {
+				if (item == '&&' || item == '||' || item == '^^') {
+					evaluated.push(item);
+				} else {
+					evaluated.push(this.simple(item, key, collectionContext));
 				};
-			}
-			return parsedResult;
+			} else { // it's an array
+				evaluated.push(this.compoundEvalLoop(item, key, collectionContext));
+			};
 		}
-		static parseShallowBrackets(str) {
-			let stack = [], breakdown = [], isCompound;
-			let tempStr = "";
-			for (let i = 0; i < str.length; i++) {
-				if(str[i] == '{' && str[i + 1] == '{') {
-					isCompound = true;
-					stack.push(i);
-					i++;
+		if (evaluated.length == 3)
+				return this.collapseLogic(evaluated);
+		return evaluated;
+	}
+
+	/**
+	 * collapse a logic array into an array with single or no items
+	 * @param logicArray: Array - 3-element array of form [item1, logicalExpressionString, item2]
+	 *		--> logicalExpressionString: '&&' is logical AND, '||' is logical OR, '^^' is a combining operation (combines all defined items)
+	 * @return empty array if logical AND is not true. array with first elemnt being an array of items if ^^ or && used. array with either item1 or item2 as the first element if || used.
+	 */
+	static collapseLogic(logicArray) {
+		let collapsed;
+		if (logicArray[1] == '^^' || (logicArray[1]  == '&&' && logicArray[0] && logicArray[0].length && logicArray[2] && logicArray[2].length)) {
+			collapsed = [easymerge(logicArray[0], logicArray[2])];
+		} else if(logicArray[1] == '||') {
+			collapsed = [logicArray[0] || logicArray[2]];
+		} else {
+			collapsed = [];
+		};
+		return collapsed;
+	}
+
+	/**
+	 * recursively parse string with brackets to an array with nested arrays for sub-expressions
+	 * str: string with brackets '{{', '}}' to parse into arrays and nested sub-arrays
+	 * @return original str if no brackets are in str. else Array with nested arrays and broken down expressions
+	 */
+	static parseBrackets(str) {
+		let parsedResult = this.parseShallowBrackets(str);
+		if (typeof parsedResult == "string") return str;
+		for (let i = 0; i < parsedResult.length; i++) {
+			if (Array.isArray(parsedResult[i])) {
+				parsedResult[i] = this.parseBrackets(parsedResult[i][0]);
+			};
+		}
+		return parsedResult;
+	}
+
+	/**
+	 * parse the first level of brackets - ignoring nested brackets
+	 * @param str: string with expressions nested using brackets
+	 * @return Array with shallowly parsed brackets or original str if no brackets found
+	 */
+	static parseShallowBrackets(str) {
+		let stack = [], breakdown = [], isCompound;
+		let tempStr = '';
+		for (let i = 0; i < str.length; i++) {
+			if(str[i] == '{' && str[i + 1] == '{') {
+				isCompound = true;
+				stack.push(i);
+				i++;
+				if (tempStr.length) {
+					breakdown.push(tempStr);
+					tempStr = '';
+				};
+			} else if(str[i] == '}' && str[i + 1] == '}') {
+				let start = stack.pop();
+				if (stack.length == 0) {
+					breakdown.push([str.substring(start+2, i)]);
+				};
+				i++;
+			} else if(stack.length == 0) {
+				if ((str[i] == '|' || str[i] == '&' || str[i] == '^') && str[i] == str[i+1]) { // todo check for character escaping
 					if (tempStr.length) {
 						breakdown.push(tempStr);
-						tempStr = "";
+						tempStr = '';
 					};
-				} else if(str[i] == '}' && str[i + 1] == '}') {
-					let start = stack.pop();
-					if (stack.length == 0) {
-						breakdown.push([str.substring(start+2, i)]);
-					};
+					breakdown.push(str[i] + str[i+1]);
 					i++;
-				} else if(stack.length == 0) {
-					if (str[i] == '|' || str[i] == '&') {
-						if (tempStr.length) {
-							breakdown.push(tempStr);
-							tempStr = "";
-						};
-						breakdown.push(str[i] + str[i+1]);
-						i++;
-					} else {
-						tempStr += str[i];
-					};
+				} else {
+					tempStr += str[i];
 				};
-			}
-			return isCompound? breakdown: str;
+			};
 		}
+		return isCompound? breakdown: str;
 	}
 }

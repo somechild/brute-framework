@@ -1,20 +1,34 @@
 import ExpressionEvaluator from 'ExpressionEvaluator';
 
 /** Objects & Classes **/
-
+/**
+ * fallback templates for 'graceful' failures
+ */ 
 export let DefaultTemplates = {
 	isEmpty() {
 		return "<p>A template has not been initialized for this page yet</p>";
-	}
+	},
 	hasError() {
 		return "<p>There was an error finding the template for this page</p>";
 	}
 }
 
+/**
+ * to query collections
+ */
 export class CollectionQuerier {
+	/**
+	 * declares context variable
+	 */
 	constructor() {
 		this.context = null;
 	}
+
+	/**
+	 * set the context of the proceeding queries
+	 * @param collectionName: name of the collection the be queried
+	 * @throws Error if collection with name of 'collectionName' does not exist
+	 */
 	with(collectionName) {
 		let collection;
 		if (typeof collectionName != "string" || !(collection = getSafe(global, `bruteframework.collections.${collectionName}`)))
@@ -22,6 +36,17 @@ export class CollectionQuerier {
 
 		this.context = collection;
 	}
+
+	/**
+	 * run query on the collection set in context
+	 * @param queryObj: an object with 1 property
+	 * 		--> Property name is key to match in collection.
+	 * 		--> Property value is the expression to evaluate and match
+	 *		--> ex. {name: "{{john&&jane}}^^{{joe}}||{{jackie}}"} will get the following collection entries:
+	 				if entries with 'name' set to john and jane both exist, they both will be added to the returned result
+	 				if an entry with 'name' set to joe exists, that will be added to the returned result
+	 				if niether john, nor john AND jane exist, fallback to an entry with name set to 'jackie'
+	 */
 	find(queryObj) {
 		if (this.context instanceof Colection && typeof queryObj == "object" && Object.keys(queryObj).length === 1) {
 			const key = Object.keys(queryObj)[0];
@@ -29,7 +54,7 @@ export class CollectionQuerier {
 			if (expression == '*') {
 				return this.context.findAll();
 			} else {
-				ExpressionEvaluator[(expression.find('{{') == -1? 'simple': 'compound')](expression, key, this.context);
+				return ExpressionEvaluator.evaluate(expression, key, this.context);
 			};
 		};
 
@@ -41,6 +66,10 @@ export class CollectionQuerier {
 
 /** Methods **/
 
+/**
+ * match multiple objects by individual property
+ * @params: objects to compare
+ */
 export function deepMatch() {
 	for(let i = 1; arguments[i]; i++) {
 		const temp1 = arguments[i-1];
@@ -56,18 +85,31 @@ export function deepMatch() {
 	return true;
 }
 
+/**
+ * merges items-into-arrays, merges arrays-with-arrays, and combines multiple items into an array
+ * @params: arrays are unwrapped & all other types are treated as 'items'
+ * @return items unwrapped from arrays and items passed as parameters are combined into one array and returned
+ */
 export function easymerge() {
 	let toRet = [];
 	for (let arg of arguments) {
-		if (Array.isArray(arg)) {
+		if (Array.isArray(arg)) { //TODO: change to use a wrapper instance rather than array primitive
 			arg.forEach((item) => toRet.push(item));
-		} else {
+		} else if(typeof arg != "undefined") {
 			toRet.push(arg);
 		};
 	}
 	return toRet;
 }
 
+/**
+ * find an object in an array by property
+ * @param arr: array to search in
+ * @param prop: property of object in array to check
+ * @param val: value the property the object should match
+ * @param getIndex: truthy if you wold like method to return index of matched element rather than element itself
+ * @return index of matched elment or matched element itself. if fails, return -1 or undefined.
+ */
 export function findByProp(arr, prop, val, getIndex) {
 	for (let i = 0; i < arr.length; i++) {
 		if(arr[i][prop] == val)
@@ -76,10 +118,20 @@ export function findByProp(arr, prop, val, getIndex) {
 	return getIndex && -1;
 }
 
+/**
+ * get framework user configurations
+ */
 export function getConfigs() {
 	return getSafe(global, 'bruteframework.configs');
 }
 
+/**
+ * safely chain property access in objects
+ * @param o: object to operate on
+ * @param str: properties to chain access. seperated by a '.' -- ex. 'profile.name.firstName' of a hypothetical 'userObject'
+ * @param executeOnSucces: method to run on final value if successfully accessed final property
+ * @return value of final property or returned value of executeOnSuccess method if successful. undefined if failed.
+ */
 export function getSafe(o, str, executeOnSuccess) {
 	let runner = o;
 	const props = str.split('.');
@@ -91,10 +143,16 @@ export function getSafe(o, str, executeOnSuccess) {
 	return runner;
 }
 
+/**
+ * prints a string with line breaks above and below
+ */
 export function println(str) {
 	console.log(`\n${str}\n`);
 }
 
+/**
+ * get instance of one of the framework's underlying classes (Route, DataModel, etc.)
+ */
 export function weaveQuery(className, classId) {
 	return getSafe(global, `bruteframework.weaveClasses.${className}`, (classInstancesMap) => {
 		return classInstancesMap.get(classId);
