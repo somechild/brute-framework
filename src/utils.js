@@ -11,7 +11,6 @@ export let DefaultTemplates = {
 	}
 }
 
-
 export class CollectionQuerier {
 	constructor() {
 		this.context = null;
@@ -41,34 +40,6 @@ export class CollectionQuerier {
 
 
 /** Methods **/
-export function println(str) {
-	console.log(`\n${str}\n`);
-}
-
-export function findByProp(arr, prop, val, getIndex) {
-	for (let i = 0; i < arr.length; i++) {
-		if(arr[i][prop] == val)
-			return getIndex? arr[i]: i;
-	};
-	return getIndex && -1;
-}
-
-export function weaveQuery(className, classId) {
-	return getSafe(global, `bruteframework.weaveClasses.${className}`, (classInstancesMap) => {
-		return classInstancesMap.get(classId);
-	});
-}
-
-export function getSafe(o, str, executeOnSuccess) {
-	let runner = o;
-	const props = str.split('.');
-	for (const prop of props) {
-		if (!(prop in runner)) return;
-		runner = runner[prop];
-	};
-	if (executeOnSuccess) return executeOnSuccess(runner);
-	return runner;
-}
 
 export function deepMatch() {
 	for(let i = 1; arguments[i]; i++) {
@@ -85,10 +56,6 @@ export function deepMatch() {
 	return true;
 }
 
-export function getConfigs() {
-	return getSafe(global, 'bruteframework.configs');
-}
-
 export function easymerge() {
 	let toRet = [];
 	for (let arg of arguments) {
@@ -99,4 +66,37 @@ export function easymerge() {
 		};
 	}
 	return toRet;
+}
+
+export function findByProp(arr, prop, val, getIndex) {
+	for (let i = 0; i < arr.length; i++) {
+		if(arr[i][prop] == val)
+			return getIndex? arr[i]: i;
+	};
+	return getIndex && -1;
+}
+
+export function getConfigs() {
+	return getSafe(global, 'bruteframework.configs');
+}
+
+export function getSafe(o, str, executeOnSuccess) {
+	let runner = o;
+	const props = str.split('.');
+	for (const prop of props) {
+		if (!(prop in runner)) return;
+		runner = runner[prop];
+	};
+	if (executeOnSuccess) return executeOnSuccess(runner);
+	return runner;
+}
+
+export function println(str) {
+	console.log(`\n${str}\n`);
+}
+
+export function weaveQuery(className, classId) {
+	return getSafe(global, `bruteframework.weaveClasses.${className}`, (classInstancesMap) => {
+		return classInstancesMap.get(classId);
+	});
 }
