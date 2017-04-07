@@ -108,7 +108,22 @@ export class ExpressionEvaluator {
 	}
 
 	/**
-	 * collapse a logic array into an array with single or no items
+	 * collapse a logic array into an array with a single item or no items
+	 	-> for cases of AND and COMBINE which reduce to a single array, if items are arrays, they will be merged
+		-> if you do not want arrays merged, wrap them in an EntryWrapper object
+	 * AND Ex.
+	 		[undefined, "&&", {"name": "joe"}] --> []
+	 		[[undefined], "&&", "joe"] --> []
+	 		[ "jane", "&&", "joe"] --> [["jane", "joe"]]
+	 		[["jane", "joe"], "&&", "jack"] --> [["jane", "joe", "jack"]]
+	 		[["jane", "joe"], "&&", ["jack", "jill"]] --> [["jane", "joe", "jack", "jill"]]
+	 * OR Ex.
+	 		[undefined, "||", {"name": "joe"}] --> [{"name": "joe"}]
+	 		["jane", "||", "joe"] --> ["jane"]
+	 * COMBINE Ex.
+	 		[undefined, "^^", {"name": "joe"}] --> [{"name": "joe"}]
+	 		["jane", "^^", "joe"] --> [["jane", "joe"]]
+	 		["jane", "^^", ["joe", "jack"]] --> [["jane", "joe", "jack"]]
 	 * @param logicArray: Array - 3-element array of form [item1, logicalExpressionString, item2]
 	 *		--> logicalExpressionString: '&&' is logical AND, '||' is logical OR, '^^' is a combining operation (combines all defined items)
 	 * @return empty array if logical AND is not true. array with first elemnt being an array of items if ^^ or && used. array with either item1 or item2 as the first element if || used.
@@ -117,7 +132,7 @@ export class ExpressionEvaluator {
 		let collapsed;
 		if (logicArray[1] == '^^' || (logicArray[1]  == '&&' && logicArray[0] && logicArray[0].length && logicArray[2] && logicArray[2].length)) {
 			collapsed = [easymerge(logicArray[0], logicArray[2])];
-		} else if(logicArray[1] == '||') {
+		} else if(logicArray[1] == '||' && (logicArray[0] || logicArray[2])) {
 			collapsed = [logicArray[0] || logicArray[2]];
 		} else {
 			collapsed = [];
@@ -126,8 +141,9 @@ export class ExpressionEvaluator {
 	}
 
 	/**
-	 * recursively parse string with brackets to an array with nested arrays for sub-expressions
-	 * str: string with brackets '{{', '}}' to parse into arrays and nested sub-arrays
+	 * recursively parse string with brackets to an array with nested arrays for sub-expressions (break down to simplest of expressions)
+	 * Ex. "{{foo&&{{bar||foobar}}}}^^baz" --> [["foo, "&&", ["bar||foobar"]], "^^", "baz"]
+	 * @param str: string with brackets '{{', '}}' to parse into arrays and nested sub-arrays
 	 * @return original str if no brackets are in str. else Array with nested arrays and broken down expressions
 	 */
 	static parseBrackets(str) {
@@ -143,6 +159,7 @@ export class ExpressionEvaluator {
 
 	/**
 	 * parse the first level of brackets - ignoring nested brackets
+	 * Ex. "{{foo&&{{bar||foobar}}}}^^baz" --> [["foo&&{{bar||foobar}}"], "^^", "baz"]
 	 * @param str: string with expressions nested using brackets
 	 * @return Array with shallowly parsed brackets or original str if no brackets found
 	 */

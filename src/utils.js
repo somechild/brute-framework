@@ -1,4 +1,4 @@
-import {ExpressionEvaluator} from './ExpressionEvaluator';
+import { ExpressionEvaluator, EntryWrapper } from './ExpressionEvaluator';
 
 /** Objects & Classes **/
 /**
@@ -95,7 +95,7 @@ export function easymerge() {
 	for (let arg of arguments) {
 		if (Array.isArray(arg)) { //TODO: change to use a wrapper instance rather than array primitive
 			arg.forEach((item) => toRet.push(item));
-		} else if(typeof arg != "undefined") {
+		} else if(typeof arg != "undefined" && ( (arg instanceof EntryWrapper && typeof arg.value != "undefined") || !(arg instanceof EntryWrapper) )) {
 			toRet.push(arg);
 		};
 	}
