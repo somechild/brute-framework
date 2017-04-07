@@ -1,4 +1,4 @@
-import { easymerge } from './utils';
+import { easymerge, checkNotEmptyIfArray } from './utils';
 
 export class EntryWrapper { // wrap so there are no type conflicts while parsing multiple data
 	constructor(data) {
@@ -113,6 +113,7 @@ export class ExpressionEvaluator {
 		-> if you do not want arrays merged, wrap them in an EntryWrapper object
 	 * AND Ex.
 	 		[undefined, "&&", {"name": "joe"}] --> []
+	 		[[], "&&", "joe"] --> []
 	 		[[undefined], "&&", "joe"] --> []
 	 		[ "jane", "&&", "joe"] --> [["jane", "joe"]]
 	 		[["jane", "joe"], "&&", "jack"] --> [["jane", "joe", "jack"]]
@@ -130,10 +131,11 @@ export class ExpressionEvaluator {
 	 */
 	static collapseLogic(logicArray) {
 		let collapsed;
-		if (logicArray[1] == '^^' || (logicArray[1]  == '&&' && logicArray[0] && logicArray[0].length && logicArray[2] && logicArray[2].length)) {
+		const first = checkNotEmptyIfArray(logicArray[0]), second = checkNotEmptyIfArray(logicArray[2]);
+		if (logicArray[1] == '^^' || (logicArray[1]  == '&&' && first && second)) {
 			collapsed = [easymerge(logicArray[0], logicArray[2])];
-		} else if(logicArray[1] == '||' && (logicArray[0] || logicArray[2])) {
-			collapsed = [logicArray[0] || logicArray[2]];
+		} else if(logicArray[1] == '||' && (first || second)) {
+			collapsed = [first? easymerge(logicArray[0]): easymerge(logicArray[2])];
 		} else {
 			collapsed = [];
 		};

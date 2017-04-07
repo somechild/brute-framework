@@ -67,6 +67,17 @@ export class CollectionQuerier {
 /** Methods **/
 
 /**
+ * @param o: anything
+ * @return true if o is an array and consists of values that are not all undefined
+ */
+export function checkNotEmptyIfArray(o)  {
+	if (o && Array.isArray(o)) {
+		return o.length && o.reduce((accum, cur) => accum || (typeof cur != "undefined"), false);
+	};
+	return o;
+}
+
+/**
  * match multiple objects by individual property
  * @params: objects to compare
  */
@@ -94,7 +105,9 @@ export function easymerge() {
 	let toRet = [];
 	for (let arg of arguments) {
 		if (Array.isArray(arg)) { //TODO: change to use a wrapper instance rather than array primitive
-			arg.forEach((item) => toRet.push(item));
+			arg.forEach((item) => {
+				if (typeof item != "undefined") toRet.push(item);
+			});
 		} else if(typeof arg != "undefined" && ( (arg instanceof EntryWrapper && typeof arg.value != "undefined") || !(arg instanceof EntryWrapper) )) {
 			toRet.push(arg);
 		};
