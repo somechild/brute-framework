@@ -37,7 +37,7 @@ jspm_packages
 .node_repl_history
 
 # do not push to git
-lib
+#lib
 
 # OS generated files #
 ######################
