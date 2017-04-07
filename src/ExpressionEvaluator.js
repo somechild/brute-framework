@@ -39,7 +39,7 @@ export class ExpressionEvaluator {
 	 * @param collectionContext: Collection - collection to search in
 	 * @return Array with result of expression searched in collection 
 	 */
-	static simple(expr, key, collectionContext) {  //TODO: change returned to use a wrapper instance rather than array primitive
+	static simple(expr, key, collectionContext) {
 		let breakdown = [], tempstr = "";
 		for (let i = 0; i < expr.length; i++) {
 			if ((expr[i] == '&' || expr[i] == '|' || expr[i] == '^') && expr[i] == expr[i+1]) {

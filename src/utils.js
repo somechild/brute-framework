@@ -104,7 +104,7 @@ export function deepMatch() {
 export function easymerge() {
 	let toRet = [];
 	for (let arg of arguments) {
-		if (Array.isArray(arg)) { //TODO: change to use a wrapper instance rather than array primitive
+		if (Array.isArray(arg)) {
 			arg.forEach((item) => {
 				if (typeof item != "undefined") toRet.push(item);
 			});
@@ -132,7 +132,7 @@ export function findByProp(arr, prop, val, getIndex) {
 }
 
 /**
- * get framework user configurations
+ * @return framework user configurations
  */
 export function getConfigs() {
 	return getSafe(global, 'bruteframework.configs');
@@ -158,13 +158,38 @@ export function getSafe(o, str, executeOnSuccess) {
 
 /**
  * prints a string with line breaks above and below
+ * @param str: item to print
  */
 export function println(str) {
 	console.log(`\n${str}\n`);
 }
 
 /**
- * get instance of one of the framework's underlying classes (Route, DataModel, etc.)
+ * Unwrap array with non-array items nested in sub-arrays
+ * Note: this method will also unwrap values from EntryWrapper objects
+ * Ex. [['joe', 'jane'], 'jordan', ['jack', ['jill', 'jeff']]] --> ['joe', 'jane', 'jordan', 'jack', 'jill', 'jeff']
+ * @param arr: array to unwrap
+ * @return unwrapped array
+ */
+export function unwrap(arr) {
+	let unwrapped = [];
+	for (var i = 0; i < arr.length; i++) {
+		if (arr[i] instanceof EntryWrapper) {
+			unwrapped.push(unwrapped[i].value);
+		} else if (Array.isArray(arr[i])) {
+			let temp = unwrap(arr[i]);
+			for (let item of temp) {
+				unwrapped.push(item);
+			}
+		} else if(typeof arr[i] != "undefined") {
+			unwrapped.push(arr[i]);
+		}
+	};
+	return unwrapped;
+}
+
+/**
+ * @return instance of one of the framework's underlying classes (Route, DataModel, etc.)
  */
 export function weaveQuery(className, classId) {
 	return getSafe(global, `bruteframework.weaveClasses.${className}`, (classInstancesMap) => {

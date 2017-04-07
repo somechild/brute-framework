@@ -10,13 +10,13 @@ class DataModel {
 		this._id = uuid();
 
 		if (route instanceof Route) {
-			this.route = route.getId();
+			this.route = route.id;
 		};
 
 		this.setDesign(design);
 	}
 
-	getId() {
+	get id() {
 		return this._id;
 	}
 
@@ -37,9 +37,9 @@ class DataModel {
 	 * @return old routeId
 	 */
 	setRoute(newRoute) {
-		if (newRoute instanceof Route && newRoute.getModel() === this.getId()) {
+		if (newRoute instanceof Route && newRoute.getModel() === this.id) {
 			const old = this.route; 
-			this.route = newRoute.getId();
+			this.route = newRoute.id;
 			return old;
 		} else {
 			throw new Error(`Route object is invalid, or does not point to this model already.`);
@@ -65,13 +65,11 @@ class DataModel {
 			const matches = querier.with(section.collection).find(query);
 			if (!matches)
 				throw new Error(`No matches found for pattern ${pattern}`);
-			//TODO:
-				// fix parsing to unwrap wrapper instances created by evaluator
-				// fix parsing to process required 'items' in section
-				// returns object
+			
 			o[sectionName] = Pattern.parseResults({
 				matches,
-				originalQuery: query[section.uniqueByItem],
+				originalExpression: query[section.uniqueByItem],
+				items: section.items,
 			});
 		}
 		return o;

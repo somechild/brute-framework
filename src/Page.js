@@ -33,17 +33,14 @@ class Page {
 		return old;
 	}
 
-	/**
-	 * @return id of this page
-	 */
-	getId() {
+	get id() {
 		return this._id;
 	}
 
 	/**
 	 * @return ID of PageContainer instance containing this object
 	 */
-	getContainerId() {
+	get containerId() {
 		return this.pageContainer;
 	}
 
@@ -55,9 +52,9 @@ class Page {
 	getFile() {
 		let filePath = getSafe(getConfigs(), 'general.pageStorePath');
 		if (!filePath) throw new Error('page store directory has not been configured');
-		filePath += this.getId() + ".html";
+		filePath += this.id + ".html";
 		if (this.contextHasChanged || fs.existsSync(filePath)) {
-			let template = weaveQuery('PageContainer', this.getContainerId()).getTemplate();
+			let template = weaveQuery('PageContainer', this.containerId).getTemplate();
 			// TODO: load in data to filePath using cheerio
 			// TODO: write file
 			this.contextHasChanged = false;

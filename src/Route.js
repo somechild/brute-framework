@@ -18,14 +18,11 @@ class Route {
 		const model = new DataModel(design, this);
 		const pageContainer = new PageContainer(templatePath);
 
-		this.model = model.getId();
-		this.pageContainer = pageContainer.getId(); 
+		this.model = model.id;
+		this.pageContainer = pageContainer.id; 
 	}
 
-	/**
-	 * @return this route's id
-	 */
-	getId() {
+	get id() {
 		return this._id;
 	}
 

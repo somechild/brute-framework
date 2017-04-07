@@ -1,9 +1,13 @@
 class Collection {
 	constructor(name, schema, indexByProp) {
-		
+
 	}
 
-	getId() {
+	get id() {
+
+	}
+
+	get name() {
 
 	}
 
@@ -42,11 +46,15 @@ class CollectionEntry {
 
 	}
 
+	get(propname) {
+		
+	}
+
 	parent() {
 		
 	}
 
-	getId() {
+	get id() {
 		
 	}
 }

@@ -83,4 +83,8 @@ class PageContainer {
 	getTemplatePath() {
 		return this.templatePath;
 	}
+
+	get id() {
+		return this._id;
+	}
 }
