@@ -36,7 +36,7 @@ class Design {
 		this.design = newDesign;
 		if (!this.validate(this)) {
 			this.design = old;
-			throw new Error('Invalid design layout: ${newDesign}')
+			throw new Error(`Invalid design layout: ${newDesign}`)
 		}
 		return old;
 	}

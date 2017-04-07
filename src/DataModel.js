@@ -61,7 +61,7 @@ class DataModel {
 		for (sectionName in design) {
 			const section = design[sectionName];
 			let query = {};
-			query[section.uniqueByItem] = section.matchPattern || pattern[section.endpoint];
+			query[section.uniqueByItem] = section.matchPattern || pattern.breakdown[section.endpoint];
 			const matches = querier.with(section.collection).find(query);
 			if (!matches)
 				throw new Error(`No matches found for pattern ${pattern}`);
@@ -69,7 +69,10 @@ class DataModel {
 				// fix parsing to unwrap wrapper instances created by evaluator
 				// fix parsing to process required 'items' in section
 				// returns object
-			o[sectionName] = Pattern.parseResults(matches);
+			o[sectionName] = Pattern.parseResults({
+				matches,
+				originalQuery: query[section.uniqueByItem],
+			});
 		}
 		return o;
 	}
