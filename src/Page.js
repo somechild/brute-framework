@@ -1,4 +1,4 @@
-import { deepMatch, getSafe, getConfigs, weaveQuery } from 'utils';
+import { deepMatch, getSafe, getConfigs, weaveQuery } from './utils';
 
 const uuid = require('uuid');
 const fs = require('fs');

@@ -1,4 +1,4 @@
-import { CollectionQuerier } from 'utils';
+import { CollectionQuerier } from './utils';
 const uuid = require('uuid');
 
 class DataModel {

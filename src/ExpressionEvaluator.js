@@ -1,6 +1,20 @@
-import { easymerge } from 'utils';
+import { easymerge } from './utils';
 
-export default class ExpressionEvaluator {
+export class EntryWrapper { // wrap so there are no type conflicts while parsing multiple data
+	constructor(data) {
+		this.data = data;
+	}
+	get value() {
+		return this.data;
+	}
+	set value(data) {
+		const old = this.data;
+		this.data = data;
+		return old;
+	}
+}
+
+export class ExpressionEvaluator {
 	/** public methods **/
 
 	/**
@@ -50,8 +64,8 @@ export default class ExpressionEvaluator {
 		let toRet = [];
 		for (let item of breakdown) {
 			if (item != '&&' && item != '||' && item != '^^') {
-				const entry = collectionContext.findOne({ [key]: item });
-				toRet.push(entry && [entry]);
+				const entry = new EntryWrapper(collectionContext.findOne({ [key]: item }));
+				toRet.push(entry.value && [entry.value]);
 			} else {
 				toRet.push(item)
 			};
@@ -163,6 +177,10 @@ export default class ExpressionEvaluator {
 				};
 			};
 		}
+		if (tempStr.length) {
+			breakdown.push(tempStr);
+			tempStr = '';
+		};
 		return isCompound? breakdown: str;
 	}
 }

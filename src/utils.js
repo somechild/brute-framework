@@ -1,4 +1,4 @@
-import ExpressionEvaluator from 'ExpressionEvaluator';
+import {ExpressionEvaluator} from './ExpressionEvaluator';
 
 /** Objects & Classes **/
 /**

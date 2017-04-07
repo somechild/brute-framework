@@ -1,4 +1,4 @@
-import { weaveQuery } from 'utils';
+import { weaveQuery } from './utils';
 
 const fs = require('fs');
 const uuid = require('uuid');
