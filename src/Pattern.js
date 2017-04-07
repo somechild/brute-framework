@@ -1,16 +1,3 @@
-class Design {
-	constructor() {
-
-	}
-
-
-	static validate(o) {
-
-	}
-
-
-}
-
 class Pattern {
 	constructor() {
 

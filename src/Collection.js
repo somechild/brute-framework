@@ -1,6 +1,6 @@
 class Collection {
 	constructor(name, schema, indexByProp) {
-
+		
 	}
 
 	getId() {

@@ -41,7 +41,7 @@ export class ExpressionEvaluator {
 	 */
 	static simple(expr, key, collectionContext) {  //TODO: change returned to use a wrapper instance rather than array primitive
 		let breakdown = [], tempstr = "";
-		for (var i = 0; i < expr.length; i++) {
+		for (let i = 0; i < expr.length; i++) {
 			if ((expr[i] == '&' || expr[i] == '|' || expr[i] == '^') && expr[i] == expr[i+1]) {
 				if (tempstr.length) {
 					breakdown.push(tempstr);

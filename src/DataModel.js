@@ -55,7 +55,7 @@ class DataModel {
 			throw new Error(`Invalid pattern ${pattern}`);
 
 		let o = {};
-		const design = this.design;
+		const design = this.design.layout;
 		let querier = new CollectionQuerier();
 
 		for (sectionName in design) {
