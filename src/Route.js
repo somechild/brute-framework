@@ -26,10 +26,7 @@ class Route {
 		return this._id;
 	}
 
-	/**
-	 * @return name of route
-	 */
-	getName() {
+	get name() {
 		return this.name;
 	}
 
@@ -47,9 +44,9 @@ class Route {
 	}
 
 	/**
-	 * @return model associated with route
+	 * @return DataModel instance - model associated with route
 	 */
-	getModel() {
+	get model() {
 		return this.model;
 	}
 
