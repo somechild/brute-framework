@@ -7,6 +7,7 @@ class Collection {
 		this.$name = name;
 		this.setSchema(schema);
 		this.indexingProp = indexByProp;
+		this.entries = new Map();
 	}
 
 	get id() {
@@ -24,7 +25,7 @@ class Collection {
 		for (let propDefinition of schema) {
 			if (!validTypes.has(propDefinition.type))
 				return false;
-			if (propDefinition.optional !== true || propDefinition.optional !== false || propDefinition.optional !== undefined)
+			if (propDefinition.optional !== true && propDefinition.optional !== false && propDefinition.optional !== undefined)
 				return false;
 			if (typeof propDefinition.defaultValue != "undefined" && !validTypes.has(typeof propDefinition.defaultValue))
 				return false;
@@ -39,46 +40,49 @@ class Collection {
 		return old;
 	}
 
-	get(entryIdx) {
+	validateAgainstSchema(o) {
 
+	}
+
+	get(key, value) {
+		if (key === this.indexingProp) {
+			return this.entries.get(value);
+		} else {
+			const entries = this.entries.entries();
+			for (let entry of entries) {
+				if (entry[0] == key && entry[1] == value)
+					return true;
+			}
+		};
+		return;
 	}
 
 	findOne(matchObj) {
-
+		const key = Object.keys(matchObj)[0];
+		return this.get(key, matchObj[key]);
 	}
 
 	findAll() {
-
+		return this.entries.values();
 	}
 
 	insert(o) {
-
+		if (!this.validateAgainstSchema(o))
+			throw new Error('Invalid insertion item.');
+		const key = o[this.indexingProp];
+		return this.entries.set(key, o);
 	}
 
-	remove(entryIdx) {
-
-	}
-}
-
-
-class CollectionEntry {
-	constructor(data, parentCollection) {
-		
-	}
-
-	data() {
-
-	}
-
-	get(propname) {
-
-	}
-
-	parent() {
-		
-	}
-
-	get id() {
-		
+	remove(key, value) {
+		if (key === this.indexingProp) {
+			return this.entries.delete(value);
+		} else {
+			const entries = this.entries.entries();
+			for (let entry of entries) {
+				if (entry[0] == key && entry[1] == value)
+					return this.entries.delete(entry[this.indexingProp]);
+			}
+		};
+		return;
 	}
 }

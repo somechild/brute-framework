@@ -75,12 +75,12 @@ class Pattern {
 		let o = {};
 		for (let item of items) {
 			if (queryDoesNotExpectArray && matches[0]) {
-				o[item] = matches[0].get(item);
+				o[item] = matches[0][item];
 			} else {
 				o[item] = [];
 				for (let match of matches) {
 					if (typeof match != "undefined") {
-						o[item].push(match.get(item));
+						o[item].push(match[item]);
 					};
 				}
 			};
