@@ -2,7 +2,6 @@ import { println, DefaultTemplates } from './utils';
 
 const uuid = require('uuid');
 const fs = require('fs');
-const cheers = require('cheerio');
 
 class PageContainer {
 	/**

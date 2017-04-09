@@ -1,4 +1,6 @@
 import { ExpressionEvaluator, EntryWrapper } from './ExpressionEvaluator';
+const cheerio = require('cheerio');
+
 
 /** Objects & Classes **/
 /**
@@ -61,6 +63,24 @@ export class CollectionQuerier {
 		return [];
 	}
 };
+
+export class TemplateProcessor {
+	constructor(template) {
+		
+	}
+	
+	setTemplate(template) {
+		
+	}
+
+	processWith(data) {
+		
+	}
+
+	static validateTemplate(template) {
+		
+	}
+}
 
 
 

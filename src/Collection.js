@@ -1,4 +1,5 @@
 const uuid = require('uuid');
+const extend = require('util')._extend;
 
 class Collection {
 	/**
@@ -27,7 +28,7 @@ class Collection {
 	/**
 	 * validate formate of a schema object
 	 * @param schema: object -- schema
-		EX.
+		EX:
 			{
 				"name": {
 					"type": "string",
@@ -43,6 +44,9 @@ class Collection {
 					"required": false,
 				},
 			}
+		NOTE:
+			> valid types are: 'string', 'object', 'boolean', 'number'
+			> types can be wrapped in arrays using square bracket wrappers (EX. '[string]')
 	 * @return true if valid
 	 */
 	validateSchema(schema) {
@@ -67,17 +71,80 @@ class Collection {
 	 * @return old schema
 	 */
 	setSchema(schema) {
-		if(!this.validateSchema(schema)) throw new Error(`Invalid schema: ${schema}`);;
+		if(!this.validateSchema(schema)) throw new Error(`Invalid schema: ${schema}`);
+
 		const old = this.schema;
 		this.schema = schema;
+
+		this.propsWithDefaults = Object.keys(schema).reduce((accum, prop) => {
+			if (typeof schema[prop].defaultValue === "undefined") {
+				if (schema[prop].required)
+					accum[1][prop] = true;
+				else
+					accum[0][prop] = true;
+			}
+			return accum;
+		}, [{}, {}]);
+
 		return old;
 	}
 
 	/**
 	 * validate an entry against currently set schema
+	 * Note: fill the default required properties using fillDefaultValues(entry) method
+	 * @param o: variable to validate against schema
+	 * @return true if valid
 	 */
 	validateAgainstSchema(o) {
+		const schema = this.schema;
+		if (typeof o != "object" || Array.isArray(o)) return false;
 
+		let requiredPropsWithNoDefaultValues = extend({}, this.propsWithDefaults[1]);
+		
+		for (prop in o) {
+			const propDefinition = schema[prop];
+			if (typeof propDefinition == "undefined") return false;
+
+			if (propDefinition.required && (prop in requiredPropsWithNoDefaultValues))
+				delete requiredPropsWithNoDefaultValues[prop];
+			
+			const isArray = propDefinition.type[0] === '[';
+			const type = isArray ? propDefinition.type.slice(1, -1) : propDefinition.type;
+
+			const propValue = o[prop];
+			if (isArray) {
+				if (!Array.isArray(propValue)) return false;
+				for(let item of propValue) {
+					if(typeof propValue != type) return false;
+				}
+			} else if (typeof propValue != type) {
+				return false;
+			};
+
+		};
+
+		if (Object.keys(requiredPropsWithNoDefaultValues).length) return false;
+		return true;
+	}
+
+	/**
+	 * looks through an entry's properties and fills missing properties with schema-defined default values
+	 * @param entry: object -- an entry object validated against schema already
+	 * @return entry object with missing properties filled in using schema-defined defaults
+	 */
+	fillDefaultValues(entry) {
+		let defaultDefinedProps = extend({}, this.propsWithDefaults[0], this.propsWithDefaults[1]);
+		for (prop in entry) {
+			if (prop in defaultDefinedProps)
+				delete defaultDefinedProps[prop];
+		};
+
+		// fill in remaining
+		const schema = this.schema; 
+		for(prop in defaultDefinedProps)
+			entry[prop] = schema[prop].defaultValue;
+		
+		return entry;
 	}
 
 	/**
@@ -127,7 +194,7 @@ class Collection {
 		if (!this.validateAgainstSchema(o))
 			throw new Error(`Invalid insertion item. ${o}`);
 		const key = o[this.indexingProp];
-		return this.entries.set(key, o);
+		return this.entries.set(key, this.fillDefaultValues(o));
 	}
 
 	/**
