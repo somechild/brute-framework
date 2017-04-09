@@ -1,4 +1,5 @@
 import { ExpressionEvaluator, EntryWrapper } from './ExpressionEvaluator';
+const uuid = require('uuid')
 const cheerio = require('cheerio');
 
 
@@ -65,20 +66,45 @@ export class CollectionQuerier {
 };
 
 export class TemplateProcessor {
+	/**
+	 * @param template
+	 * @throws Error if invalid template format
+	 */
 	constructor(template) {
-		
+		this._id = uuid();
+		this.setTemplate(template);
+	}
+
+	get id() {
+		return this._id;
 	}
 	
+	/**
+	 * @param template
+	 * @throws Error if invalid template format
+	 * @return old template
+	 */
 	setTemplate(template) {
-		
+		if (!this.validateTemplate(template)) throw new Error('Invalid template format');
+		const old = this.template;
+		this.template = template;
+		return old;
 	}
 
+	/**
+	 * @param data
+	 * @return
+	 */
 	processWith(data) {
-		
+		// fk
 	}
 
+	/**
+	 * @param template
+	 * @return true if valid template
+	 */
 	static validateTemplate(template) {
-		
+		// fk
 	}
 }
 

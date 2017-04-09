@@ -1,4 +1,4 @@
-import { println, DefaultTemplates } from './utils';
+import { println, DefaultTemplates, TemplateProcessor } from './utils';
 
 const uuid = require('uuid');
 const fs = require('fs');
@@ -20,10 +20,14 @@ class PageContainer {
 	/**
 	 * set template path
 	 * @param path: String -- path to template 
+	 * @throws Error if there is no file at specified path
+	 * @throws if file is invalid template format
+	 * @throws fs error if trouble reading file through node's fs
 	 * @return old path
 	 */
 	setTemplate(path) {
 		if (!fs.existsSync(path)) throw new Error(`File does not exist at ${path}`);
+		if (!TemplateProcessor.validateTemplate(fs.readFileSync(this.getTemplatePath(), 'utf-8'))) throw new Error(`File at path ${path} is an invalid template format`);
 		const old = this.templatePath;
 		this.templatePath = path;
 		return old;

@@ -51,6 +51,7 @@ class Page {
 	 * if context has changed, update the file before returning path
 	 * @throws Error if page does not belong to a valid PageContainer instance
 	 * @throws Error if page store directory has not been configured
+	 * @throws Error if invalid template
 	 * @return path to file associated with this page
 	 */
 	getFile() {
