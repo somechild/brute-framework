@@ -18,8 +18,8 @@ class Route {
 		const model = new DataModel(design, this);
 		const pageContainer = new PageContainer(templatePath);
 
-		this.model = model.id;
-		this.pageContainer = pageContainer.id; 
+		this.modelId = model.id;
+		this.pageContainerId = pageContainer.id; 
 	}
 
 	get id() {
@@ -36,7 +36,7 @@ class Route {
 	 * 		--> {defualt} refresh cached template
 	 */
 	updateTemplate(newPath) {
-		const pageCont = weaveQuery('PageContainer', this.pageContainer);
+		const pageCont = this.pageContainer;
 		if (!newPath) {
 			newPath = pageCont.getTemplatePath();
 		}
@@ -47,15 +47,31 @@ class Route {
 	 * @return DataModel instance - model associated with route
 	 */
 	get model() {
-		return this.model;
+		return weaveQuery('DataModel', this.modelId);
+	}
+
+
+	/**
+	 * @return PageContainer instance - container associated with route
+	 */
+	get pageContainer() {
+		return weaveQuery('PageContainer', this.pageContainerId);
 	}
 
 	/**
 	 * get HTML file based on Pattern instance
 	 * @param pattern instance to match file against
+	 * @throws Error if pattern is invalid
 	 * @return path to file matching pattern
 	 */
 	getFileWithPattern(pattern) {
-		// TODO
+		if (!Pattern.validate(pattern)) throw new Error(`Invalid pattern ${pattern}`);
+		const model = this.model;
+		const pageContainer = this.pageContainer;
+
+		const data = model.getDataInstance(pattern);
+		const page = pageContainer.getPageWithData(pattern, data);
+
+		return page.getFile();
 	}
 }

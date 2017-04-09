@@ -1,7 +1,7 @@
 import { ExpressionEvaluator, EntryWrapper } from './ExpressionEvaluator';
 const uuid = require('uuid')
 const cheerio = require('cheerio');
-
+const handlebars = require('handlebars/runtime');
 
 /** Objects & Classes **/
 /**
@@ -93,10 +93,11 @@ export class TemplateProcessor {
 
 	/**
 	 * @param data
-	 * @return
+	 * @return string: template context processed with data
 	 */
 	processWith(data) {
-		// fk
+		let compiledTemplate = handlebars.compile(this.template);
+		return compiledTemplate(data);
 	}
 
 	/**
@@ -104,7 +105,16 @@ export class TemplateProcessor {
 	 * @return true if valid template
 	 */
 	static validateTemplate(template) {
-		// fk
+		let returner;
+		try {
+			let compiledTemplate = handlebars.compile(this.template);
+			returner = compiledTemplate(data) && true;
+		} catch(e) {
+			console.log(e.message + '\n');
+			console.log(e.stack);
+		} finally {
+			return returner;
+		}
 	}
 }
 

@@ -71,12 +71,15 @@ class PageContainer {
 	 * @return string of template associated with this container
 	 */
 	getTemplate() {
+		let returner;
 		try {
-			return fs.readFileSync(this.getTemplatePath(), 'utf-8');
+			returner = fs.readFileSync(this.getTemplatePath(), 'utf-8');
 		} catch(e) {
 			console.log(e.stack);
 			console.log(e.message);
-			return DefaultTemplates.hasError();
+			returner = DefaultTemplates.hasError();
+		} finally {
+			return returner;
 		}
 	}
 

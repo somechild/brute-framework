@@ -26,7 +26,7 @@ class Collection {
 	}
 
 	/**
-	 * validate formate of a schema object
+	 * validate format of a schema object
 	 * @param schema: object -- schema
 		EX:
 			{
