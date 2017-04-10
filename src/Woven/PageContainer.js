@@ -1,16 +1,24 @@
-import { println, DefaultTemplates, TemplateProcessor } from './utils';
+import { DefaultTemplates, println, TemplateProcessor, Weaver } from '../helpers/utils';
+import { maxWovenInsertionAttempts as maxAttempts } from '../helpers/constants';
 
 const uuid = require('uuid');
 const fs = require('fs');
 
-class PageContainer {
+export class PageContainer {
 	/**
 	 * assign unique ID & initalize Page container as a map
 	 * @param templatePath: String - path to template associated with this container
 	 * @throws Error if there is no template at specified templatePath
+	 * @throws Error if unexpected error initializing page with unique id
 	 */
 	constructor(templatePath) {
 		this._id = uuid();
+		while(!Weaver.insert(this) && insertionAttempts > 0) {
+			this._id = uuid();
+			insertionAttempts--;
+		}
+		if (!insertionAttempts) throw new Error('Unexpected error initializing ${this.constructor.name} class with template path ${templatePath}');
+
 		this.pages = new Map();
 
 		if (typeof templatePath == "string")

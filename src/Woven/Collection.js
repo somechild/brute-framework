@@ -1,15 +1,25 @@
+import { Weaver } from '../helpers/utils';
+import { maxWovenInsertionAttempts as maxAttempts } from '../helpers/constants';
+
 const uuid = require('uuid');
 const extend = require('util')._extend;
 
-class Collection {
+export class Collection {
 	/**
 	 * @param name: unique name for collection
 	 * @param schema: schema definition for validation in colleciton
 	 * @param indexByProp: unique index for each collection entry. this is going to be required.
 	 * @throws Error if invalid schema
+	 * @throws Error if unexpected error initializing page with unique id
 	 */
 	constructor(name, schema, indexByProp) {
 		this._id = uuid();
+		let insertionAttempts = maxAttempts;
+		while(!Weaver.insert(this) && insertionAttempts > 0) {
+			this._id = uuid();
+			insertionAttempts--;
+		}
+		if (!insertionAttempts) throw new Error('Unexpected error initializing ${this.constructor.name} class with name ${name}');
 
 		this.$name = name;
 		this.setSchema(schema);

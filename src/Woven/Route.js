@@ -1,19 +1,26 @@
-import { weaveQuery } from './utils';
+import { Weaver } from '../helpers/utils';
+import { maxWovenInsertionAttempts as maxAttempts } from '../helpers/constants';
 
 const fs = require('fs');
 const uuid = require('uuid');
 
-class Route {
+export class Route {
 	/**
 	 * create route with unique id, unique user-defined name
 	 * @param design: instance of Design specifying format of object used by the route's template
 	 * @param config: Object with templatePath prop to specify path to template associated with route & name prop to associate unique name with this route
+	 * @throws Error if unexpected error initializing page with unique id
 	 */
 	constructor(design, config) {
 		let { templatePath, name } = config;
 
 		this.name = name;
 		this._id = uuid();
+		while(!Weaver.insert(this) && insertionAttempts > 0) {
+			this._id = uuid();
+			insertionAttempts--;
+		}
+		if (!insertionAttempts) throw new Error('Unexpected error initializing ${this.constructor.name} class with route name ${name}');
 
 		const model = new DataModel(design, this);
 		const pageContainer = new PageContainer(templatePath);
@@ -36,18 +43,18 @@ class Route {
 	 * 		--> {defualt} refresh cached template
 	 */
 	updateTemplate(newPath) {
-		const pageCont = this.pageContainer;
+		const pageContainer = this.pageContainer;
 		if (!newPath) {
-			newPath = pageCont.getTemplatePath();
+			newPath = pageContainer.getTemplatePath();
 		}
-		pageCont.setTemplate(newPath);
+		pageContainer.setTemplate(newPath);
 	}
 
 	/**
 	 * @return DataModel instance - model associated with route
 	 */
 	get model() {
-		return weaveQuery('DataModel', this.modelId);
+		return Weaver.query('DataModel', this.modelId);
 	}
 
 
@@ -55,7 +62,7 @@ class Route {
 	 * @return PageContainer instance - container associated with route
 	 */
 	get pageContainer() {
-		return weaveQuery('PageContainer', this.pageContainerId);
+		return Weaver.query('PageContainer', this.pageContainerId);
 	}
 
 	/**

@@ -23,3 +23,5 @@
 
 	* feedback and iterations!
 */
+
+let test = require('./Woven.js');

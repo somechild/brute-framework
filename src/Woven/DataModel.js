@@ -1,13 +1,22 @@
-import { CollectionQuerier } from './utils';
+import { CollectionQuerier, Weaver } from '../helpers/utils';
+import { maxWovenInsertionAttempts as maxAttempts } from '../helpers/constants';
+
 const uuid = require('uuid');
 
-class DataModel {
+export class DataModel {
 	/**
 	 * @param design: the design of the object that the route's template needs to parse handlebars
 	 * @param route: route that this DataModel is associated with
+	 * @throws Error if unexpected error initializing page with unique id
 	 */
 	constructor(design, route) {
 		this._id = uuid();
+		let insertionAttempts = maxAttempts;
+		while(!Weaver.insert(this) && insertionAttempts > 0) {
+			this._id = uuid();
+			insertionAttempts--;
+		}
+		if (!insertionAttempts) throw new Error('Unexpected error initializing ${this.constructor.name} class with model design ${desgin}');
 
 		if (route instanceof Route) {
 			this.route = route.id;

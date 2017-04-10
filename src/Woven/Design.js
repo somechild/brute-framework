@@ -1,4 +1,9 @@
-class Design {
+import { Weaver } from '../helpers/utils';
+import { maxWovenInsertionAttempts as maxAttempts } from '../helpers/constants';
+
+const uuid = require('uuid');
+
+export class Design {
 
 	/*****--- change these as framework evolves ---*****/
 
@@ -15,8 +20,17 @@ class Design {
 	/**
 	 * @param design: user-configured design
 	 * @throws Error if invalid design layout
+	 * @throws Error if unexpected error initializing page with unique id
 	 */
 	constructor(design) {
+		this._id = uuid();
+		let insertionAttempts = maxAttempts;
+		while(!Weaver.insert(this) && insertionAttempts > 0) {
+			this._id = uuid();
+			insertionAttempts--;
+		}
+		if (!insertionAttempts) throw new Error('Unexpected error initializing ${this.constructor.name} class with design ${design}');
+
 		this.design = design;
 		if(!this.validate(this))
 			throw new Error(`Invalid design layout: ${design}`);
@@ -24,6 +38,10 @@ class Design {
 
 	get layout() {
 		return this.design;
+	}
+
+	get id() {
+		return this._id;
 	}
 
 	/**

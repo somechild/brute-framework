@@ -1,11 +1,22 @@
-import { unwrap } from './utils';
+import { unwrap, Weaver } from '../helpers/utils';
+import { maxWovenInsertionAttempts as maxAttempts } from '../helpers/constants';
 
-class Pattern {
+const uuid = require('uuid');
+
+export class Pattern {
 	/**
 	 * @param pattern: object - pattern to wrap in an instance of this class
 	 * @throws Error if pattern is invalid
+	 * @throws Error if unexpected error initializing page with unique id
 	 */
 	constructor(pattern) {
+		this._id = uuid();
+		while(!Weaver.insert(this) && insertionAttempts > 0) {
+			this._id = uuid();
+			insertionAttempts--;
+		}
+		if (!insertionAttempts) throw new Error('Unexpected error initializing ${this.constructor.name} class with pattern ${pattern}');
+
 		this.pattern = pattern;
 		if (!this.validate(this)) throw new Error(`Invalid pattern: ${pattern}`);
 	}
@@ -15,6 +26,10 @@ class Pattern {
 	 */
 	get breakdown() {
 		return this.pattern;
+	}
+
+	get id() {
+		return this._id;
 	}
 
 	/**

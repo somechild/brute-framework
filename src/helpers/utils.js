@@ -65,6 +65,9 @@ export class CollectionQuerier {
 	}
 };
 
+/**
+ * To process templates
+ */
 export class TemplateProcessor {
 	/**
 	 * @param template
@@ -115,6 +118,52 @@ export class TemplateProcessor {
 		} finally {
 			return returner;
 		}
+	}
+}
+
+/**
+ * To manage the woven class instance space
+ */
+export class Weaver {
+	/**
+	 * @param classNames: [string] - list of woven class names to initialize space for
+	 * @return true if sucessful
+	 */
+	static initializeSpace(classNames) {
+		if(!global.bruteframework)
+			global.bruteframework = {};
+		if(!global.bruteframework.weaveClasses)
+			global.bruteframework.weaveClasses = {};
+		for (let className of classNames) {
+			if (!global.bruteframework.weaveClasses[className])
+				global.bruteframework.weaveClasses[className] = new Map();
+			else return false;
+		}
+		return true;
+	}
+
+	/**
+	 * @return instance of one of the framework's underlying classes (Route, DataModel, etc.)
+	 */
+	static query(className, classId) {
+		return getSafe(global, `bruteframework.weaveClasses.${className}`, (classInstancesMap) => {
+			return classInstancesMap.get(classId);
+		});
+	}
+
+	/**
+	 * @param instance: object - instance of class to insert
+	 * @param className: string - name of class that object is instance of
+	 * @return false if item with same ID if exists in map
+	 */
+	static insert(instance) {
+		const classMap = getSafe(global, `bruteframework.weaveClasses.${instance.constructor.name}`);
+		if (!classMap) throw new Error(`Class with name ${instance.constructor.name} does not exist.`);
+
+		if (classMap.get(instance.id))
+			return false;
+
+		return classMap.set(instance.id, instance) || true;
 	}
 }
 
@@ -242,13 +291,4 @@ export function unwrap(arr) {
 		}
 	};
 	return unwrapped;
-}
-
-/**
- * @return instance of one of the framework's underlying classes (Route, DataModel, etc.)
- */
-export function weaveQuery(className, classId) {
-	return getSafe(global, `bruteframework.weaveClasses.${className}`, (classInstancesMap) => {
-		return classInstancesMap.get(classId);
-	});
 }
