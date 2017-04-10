@@ -1,9 +1,9 @@
-import { CollectionQuerier, Weaver } from '../helpers/utils';
+import { Collector, Weaver } from '../helpers/utils';
 import { maxWovenInsertionAttempts as maxAttempts } from '../helpers/constants';
 
 const uuid = require('uuid');
 
-export class DataModel {
+export default class DataModel {
 	/**
 	 * @param design: the design of the object that the route's template needs to parse handlebars
 	 * @param route: route that this DataModel is associated with
@@ -12,10 +12,8 @@ export class DataModel {
 	constructor(design, route) {
 		this._id = uuid();
 		let insertionAttempts = maxAttempts;
-		while(!Weaver.insert(this) && insertionAttempts > 0) {
+		while(!Weaver.insert(this) && insertionAttempts --> 0)
 			this._id = uuid();
-			insertionAttempts--;
-		}
 		if (!insertionAttempts) throw new Error('Unexpected error initializing ${this.constructor.name} class with model design ${desgin}');
 
 		if (route instanceof Route) {
@@ -65,9 +63,9 @@ export class DataModel {
 
 		let o = {};
 		const design = this.design.layout;
-		let querier = new CollectionQuerier();
+		let querier = Collector.getQuerier();
 
-		for (sectionName in design) {
+		for (let sectionName in design) {
 			const section = design[sectionName];
 			let query = {};
 			query[section.uniqueByItem] = section.matchPattern || pattern.breakdown[section.endpoint];

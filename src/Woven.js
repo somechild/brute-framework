@@ -6,7 +6,7 @@ import PageContainer from './Woven/PageContainer';
 import Pattern from './Woven/Pattern';
 import Route from './Woven/Route';
 
-import { Weaver } from './helpers/utils';
+import { Collector, Weaver } from './helpers/utils';
 Weaver.initializeSpace([
 	'Collection',
 	'DataModel',
@@ -16,6 +16,8 @@ Weaver.initializeSpace([
 	'Pattern',
 	'Route'
 ]);
+
+Collector.initializeSpace();
 
 module.exports = {
 	Collection,

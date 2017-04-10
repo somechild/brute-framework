@@ -4,7 +4,7 @@ import { maxWovenInsertionAttempts as maxAttempts } from '../helpers/constants';
 const uuid = require('uuid');
 const fs = require('fs');
 
-export class PageContainer {
+export default class PageContainer {
 	/**
 	 * assign unique ID & initalize Page container as a map
 	 * @param templatePath: String - path to template associated with this container
@@ -13,10 +13,8 @@ export class PageContainer {
 	 */
 	constructor(templatePath) {
 		this._id = uuid();
-		while(!Weaver.insert(this) && insertionAttempts > 0) {
+		while(!Weaver.insert(this) && insertionAttempts --> 0)
 			this._id = uuid();
-			insertionAttempts--;
-		}
 		if (!insertionAttempts) throw new Error('Unexpected error initializing ${this.constructor.name} class with template path ${templatePath}');
 
 		this.pages = new Map();

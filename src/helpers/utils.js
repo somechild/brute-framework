@@ -1,4 +1,6 @@
 import { ExpressionEvaluator, EntryWrapper } from './ExpressionEvaluator';
+import Collection from '../Woven/Collection';
+
 const uuid = require('uuid')
 const cheerio = require('cheerio');
 const handlebars = require('handlebars/runtime');
@@ -17,9 +19,62 @@ export let DefaultTemplates = {
 }
 
 /**
+ * to add and remove entries from collections
+ */
+export class Collector {
+	/**
+	 * initialize collection space on the global bruteframework space
+	 * @return true if initialized. false if already exists
+	 */
+	static initializeSpace() {
+		if(!global.bruteframework)
+			global.bruteframework = {};
+		if(!global.bruteframework.collections) {
+			global.bruteframework.collections = {};
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * add collection to collection space
+	 * @param instance: object -- instance of Collection to add to space
+	 * @return true if added. false if collection space has not been initialized OR if collection already exists with same name.
+	 */
+	static addCollection(instance) {
+		const collectionSpace = getSafe(global, 'bruteframework.collections');
+		if (!collectionSpace) return console.log('collection space has not yet been initialized.') && false;
+		if (collectionSpace[instance.name] instanceof Collection) return console.log(`Collection with name ${instance.name} already exists.`) && false;
+		collectionSpace[instance.name] = instance;
+		return true;
+	}
+
+	/**
+	 * remove collection from collection space
+	 * @param collectionName: string -- unique name of collection to drop
+	 * @return true if successfully deleted. false if collection space has not been initialized or if there is no collection with matching name to delete.
+	 */
+	static dropCollection(collectionName) {
+		const collectionSpace = getSafe(global, 'bruteframework.collections');
+		if (!collectionSpace) return console.log('collection space has not yet been initialized.') && false;
+		if (typeof collectionSpace[collectionName] == "undefined") return console.log(`Collection with name ${collectionName} does not exist`) && false;
+
+		delete collectionSpace[collectionName];
+		return true;
+	}
+
+	/**
+	 * @return new instance of 'CollectionQuerier'
+	 */
+	static getQuerier() {
+		return new CollectionQuerier();
+	}
+}
+
+/**
  * to query collections
  */
-export class CollectionQuerier {
+class CollectionQuerier {
 	/**
 	 * declares context variable
 	 */
@@ -193,7 +248,7 @@ export function deepMatch() {
 
 		if (Object.keys(temp2).length != Object.keys(temp1).length)
 			return false;
-		for (prop in temp2) {
+		for (let prop in temp2) {
 			if (temp2[prop] != temp1[prop])
 				return false;
 		}
@@ -253,7 +308,7 @@ export function getConfigs() {
 export function getSafe(o, str, executeOnSuccess) {
 	let runner = o;
 	const props = str.split('.');
-	for (const prop of props) {
+	for (let prop of props) {
 		if (!(prop in runner)) return;
 		runner = runner[prop];
 	};

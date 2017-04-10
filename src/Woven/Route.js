@@ -4,7 +4,7 @@ import { maxWovenInsertionAttempts as maxAttempts } from '../helpers/constants';
 const fs = require('fs');
 const uuid = require('uuid');
 
-export class Route {
+export default class Route {
 	/**
 	 * create route with unique id, unique user-defined name
 	 * @param design: instance of Design specifying format of object used by the route's template
@@ -16,10 +16,8 @@ export class Route {
 
 		this.name = name;
 		this._id = uuid();
-		while(!Weaver.insert(this) && insertionAttempts > 0) {
+		while(!Weaver.insert(this) && insertionAttempts --> 0)
 			this._id = uuid();
-			insertionAttempts--;
-		}
 		if (!insertionAttempts) throw new Error('Unexpected error initializing ${this.constructor.name} class with route name ${name}');
 
 		const model = new DataModel(design, this);

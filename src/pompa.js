@@ -24,4 +24,4 @@
 	* feedback and iterations!
 */
 
-let test = require('./Woven.js');
+let MainClasses = require('./Woven.js');

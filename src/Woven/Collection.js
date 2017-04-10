@@ -1,10 +1,9 @@
-import { Weaver } from '../helpers/utils';
-import { maxWovenInsertionAttempts as maxAttempts } from '../helpers/constants';
+import { Collector } from '../helpers/utils';
 
 const uuid = require('uuid');
 const extend = require('util')._extend;
 
-export class Collection {
+export default class Collection {
 	/**
 	 * @param name: unique name for collection
 	 * @param schema: schema definition for validation in colleciton
@@ -14,12 +13,8 @@ export class Collection {
 	 */
 	constructor(name, schema, indexByProp) {
 		this._id = uuid();
-		let insertionAttempts = maxAttempts;
-		while(!Weaver.insert(this) && insertionAttempts > 0) {
-			this._id = uuid();
-			insertionAttempts--;
-		}
-		if (!insertionAttempts) throw new Error('Unexpected error initializing ${this.constructor.name} class with name ${name}');
+		let insertionAttempt = Collector.addCollection(this);
+		if (!insertionAttempt) throw new Error('Unexpected error initializing ${this.constructor.name} class with name ${name}. Ensure a collection with the same name has not already been created.');
 
 		this.$name = name;
 		this.setSchema(schema);
@@ -63,7 +58,8 @@ export class Collection {
 		if (typeof schema != "object" && !Array.isArray(schema))
 			return false;
 		const validTypes = new Set(["string", "object", "number", "boolean", "[string]", "[object]", "[number]", "[boolean]" /*, not used: "symbol", "function"*/]);
-		for (let propDefinition of schema) {
+		for (let prop in schema) {
+			let propDefinition = schema[prop];
 			if (!validTypes.has(propDefinition.type))
 				return false;
 			if (propDefinition.required !== true && propDefinition.required !== false && propDefinition.required !== undefined)
@@ -86,15 +82,16 @@ export class Collection {
 		const old = this.schema;
 		this.schema = schema;
 
-		this.propsWithDefaults = Object.keys(schema).reduce((accum, prop) => {
-			if (typeof schema[prop].defaultValue === "undefined") {
-				if (schema[prop].required)
-					accum[1][prop] = true;
-				else
-					accum[0][prop] = true;
+		let propBreakdown = Object.keys(schema).reduce((accum, prop) => {
+			if (typeof schema[prop].defaultValue != "undefined") {
+				accum[0][prop] = true;
+			} else if (schema[prop].required) {
+				accum[1][prop] = true;
 			}
 			return accum;
 		}, [{}, {}]);
+		this.propsWithDefaults = propBreakdown[0];
+		this.requiredWithNoDefault = propBreakdown[1];
 
 		return old;
 	}
@@ -109,9 +106,9 @@ export class Collection {
 		const schema = this.schema;
 		if (typeof o != "object" || Array.isArray(o)) return false;
 
-		let requiredPropsWithNoDefaultValues = extend({}, this.propsWithDefaults[1]);
+		let requiredPropsWithNoDefaultValues = extend({}, this.requiredWithNoDefault);
 		
-		for (prop in o) {
+		for (let prop in o) {
 			const propDefinition = schema[prop];
 			if (typeof propDefinition == "undefined") return false;
 
@@ -120,19 +117,17 @@ export class Collection {
 			
 			const isArray = propDefinition.type[0] === '[';
 			const type = isArray ? propDefinition.type.slice(1, -1) : propDefinition.type;
-
 			const propValue = o[prop];
 			if (isArray) {
 				if (!Array.isArray(propValue)) return false;
 				for(let item of propValue) {
-					if(typeof propValue != type) return false;
+					if(typeof item != type) return false;
 				}
 			} else if (typeof propValue != type) {
 				return false;
 			};
 
 		};
-
 		if (Object.keys(requiredPropsWithNoDefaultValues).length) return false;
 		return true;
 	}
@@ -143,15 +138,15 @@ export class Collection {
 	 * @return entry object with missing properties filled in using schema-defined defaults
 	 */
 	fillDefaultValues(entry) {
-		let defaultDefinedProps = extend({}, this.propsWithDefaults[0], this.propsWithDefaults[1]);
-		for (prop in entry) {
+		let defaultDefinedProps = extend({}, this.propsWithDefaults);
+		for (let prop in entry) {
 			if (prop in defaultDefinedProps)
 				delete defaultDefinedProps[prop];
 		};
 
 		// fill in remaining
 		const schema = this.schema; 
-		for(prop in defaultDefinedProps)
+		for(let prop in defaultDefinedProps)
 			entry[prop] = schema[prop].defaultValue;
 		
 		return entry;
@@ -162,19 +157,25 @@ export class Collection {
 	 * Note: if key is the unique indexing property, then retrieval by value will be quicker
 	 * @param key: string -- key to compare value to for entry retrieval
 	 * @param value: value to match entry with
-	 * @return matching entry if found. undefined otherwise
+	 * @param multi: boolean -- true if return in array form (return all matching entries)
+	 * @return matching entry/entries if found. undefined otherwise
 	 */ 
-	get(key, value) {
+	get(key, value, multi) {
 		if (key === this.indexingProp) {
-			return this.entries.get(value);
+			return multi? [this.entries.get(value)]: this.entries.get(value);
 		} else {
+			let returner = multi && [];
 			const entries = this.entries.entries();
 			for (let entry of entries) {
-				if (entry[0] == key && entry[1] == value)
-					return entry;
+				if (key in entry[1] && entry[1][key] === value) {
+					if (!multi)
+						return entry[1];
+					returner.push(entry[1]);
+				}
 			}
+			return returner;
 		};
-		return;
+		return multi? []: undefined;
 	}
 
 	/**
@@ -185,6 +186,16 @@ export class Collection {
 	findOne(matchObj) {
 		const key = Object.keys(matchObj)[0];
 		return this.get(key, matchObj[key]);
+	}
+
+	/**
+	 * find all entries
+	 * @param matchObj: object - with one property (key), and associated value to retrieve entry by
+	 * @return array of matching entries or undefined
+	 */
+	find(matchObj) {
+		const key = Object.keys(matchObj)[0];
+		return this.get(key, matchObj[key], true);
 	}
 
 	/**

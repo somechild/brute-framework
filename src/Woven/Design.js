@@ -3,7 +3,7 @@ import { maxWovenInsertionAttempts as maxAttempts } from '../helpers/constants';
 
 const uuid = require('uuid');
 
-export class Design {
+export default class Design {
 
 	/*****--- change these as framework evolves ---*****/
 
@@ -25,10 +25,8 @@ export class Design {
 	constructor(design) {
 		this._id = uuid();
 		let insertionAttempts = maxAttempts;
-		while(!Weaver.insert(this) && insertionAttempts > 0) {
+		while(!Weaver.insert(this) && insertionAttempts --> 0)
 			this._id = uuid();
-			insertionAttempts--;
-		}
 		if (!insertionAttempts) throw new Error('Unexpected error initializing ${this.constructor.name} class with design ${design}');
 
 		this.design = design;
@@ -71,7 +69,7 @@ export class Design {
 			if (!layout || typeof layout != "object" || Array.isArray(layout)) return false;
 
 		const { requiredProps, dynamicRequiredProps, staticRequiredProps } = this.getRequiredItems();
-		for (prop in layout) {
+		for (let prop in layout) {
 			let descriptionItem = layout[prop];
 			if (!descriptionItem || typeof descriptionItem != "object" || Array.isArray(descriptionItem)) return false;
 			for (let requiredProp of requiredProps) {

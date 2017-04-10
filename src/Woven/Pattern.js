@@ -3,7 +3,7 @@ import { maxWovenInsertionAttempts as maxAttempts } from '../helpers/constants';
 
 const uuid = require('uuid');
 
-export class Pattern {
+export default class Pattern {
 	/**
 	 * @param pattern: object - pattern to wrap in an instance of this class
 	 * @throws Error if pattern is invalid
@@ -11,10 +11,8 @@ export class Pattern {
 	 */
 	constructor(pattern) {
 		this._id = uuid();
-		while(!Weaver.insert(this) && insertionAttempts > 0) {
+		while(!Weaver.insert(this) && insertionAttempts --> 0)
 			this._id = uuid();
-			insertionAttempts--;
-		}
 		if (!insertionAttempts) throw new Error('Unexpected error initializing ${this.constructor.name} class with pattern ${pattern}');
 
 		this.pattern = pattern;
@@ -67,7 +65,7 @@ export class Pattern {
 		if (!(o instanceof Pattern)) return false;
 		const breakdown = o.breakdown;
 		if (typeof breakdown != "object" || Array.isArray(breakdown)) return false;
-		for (prop in breakdown) {
+		for (let prop in breakdown) {
 			if (typeof breakdown[prop] != "string") return false;
 		}
 		return true;
