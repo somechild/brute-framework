@@ -1,0 +1,19 @@
+export default {
+	getSampleDesign() {
+		return {
+			"userInfo": {
+				"collection": "Users",
+				"items": ["name", "username", "profileImage"],
+				"uniqueByItem": "name",
+				"useDynamicPattern": true,
+				"endpoint": "user"
+			},
+			"footerContactInfo": {
+				"collection": "GeneralInfo",
+				"items": ["email", "phonenumber"],
+				"uniqueByItem": "key",
+				"matchPattern": "*"
+			}
+		};
+	}
+}
