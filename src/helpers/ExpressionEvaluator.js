@@ -64,10 +64,12 @@ export class ExpressionEvaluator {
 		let toRet = [];
 		for (let item of breakdown) {
 			if (item != '&&' && item != '||' && item != '^^') {
-				const entry = new EntryWrapper(collectionContext.findOne({ [key]: item }));
-				toRet.push(entry.value && [entry.value]);
+				const entry = new EntryWrapper(collectionContext.find({ [key]: item }));
+				if (typeof entry.value != "undefined") {
+					toRet.push(entry);
+				};
 			} else {
-				toRet.push(item)
+				toRet.push(item);
 			};
 
 			if (toRet.length == 3) {

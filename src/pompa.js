@@ -22,6 +22,8 @@
 	* documentation website
 
 	* feedback and iterations!
+
+	* i hope modules use topological sorts lol cause i have interdependent shit rip
 */
 
 let MainClasses = require('./Woven.js');
