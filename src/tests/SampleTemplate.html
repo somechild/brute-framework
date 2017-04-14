@@ -1,0 +1,14 @@
+<!doctype html>
+<html>
+<body>
+	<p class="userinfo-name">{{userInfo.name}}</p>
+	<p class="userinfo-username">{{userInfo.username}}</p>
+	<p class="userinfo-profileImage">{{userInfo.profileImage}}</p>
+	{{#each footerContactInfo.email}}
+		<p class="footerContactInfo-email">{{.}}</p>
+	{{/each}}
+	{{#each footerContactInfo.phonenumber}}
+		<p class="footerContactInfo-phonenumber">{{.}}</p>
+	{{/each}}
+</body>
+</html>

@@ -6,4 +6,4 @@ import Pattern from './Pattern';
 import Route from './Route';
 
 
-module.exports = [Collection, DataModel, Design, PageContainer, Pattern, Route];
+module.exports = [...Collection, ...DataModel, ...Design, ...PageContainer, ...Pattern, ...Route];
