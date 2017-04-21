@@ -26,7 +26,7 @@ export class ExpressionEvaluator {
 	 */
 	static evaluate(expr, matchKey, collectionContext) {
 		let parsedExpr = this.parseBrackets(expr);
-		if (typeof parsedExpr == "string") return this.simple(parsedExpr);
+		if (typeof parsedExpr == "string") return this.simple(parsedExpr, matchKey, collectionContext);
 		return this.compoundEvalLoop(parsedExpr, matchKey, collectionContext);
 	}
 

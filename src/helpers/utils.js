@@ -336,7 +336,7 @@ export function unwrap(arr) {
 	let unwrapped = [];
 	for (var i = 0; i < arr.length; i++) {
 		if (arr[i] instanceof EntryWrapper) {
-			unwrapped.push(unwrapped[i].value);
+			unwrapped.push(arr[i].value);
 		} else if (Array.isArray(arr[i])) {
 			let temp = unwrap(arr[i]);
 			for (let item of temp) {
