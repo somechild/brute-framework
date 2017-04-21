@@ -30,7 +30,7 @@ export default class Design {
 		if (!insertionAttempts) throw new Error('Unexpected error initializing ${this.constructor.name} class with design ${design}');
 
 		this.design = design;
-		if(!this.validate(this))
+		if(!Design.validate(this))
 			throw new Error(`Invalid design layout: ${design}`);
 	}
 
@@ -50,7 +50,7 @@ export default class Design {
 	set layout(newDesign) {
 		const old = this.design;
 		this.design = newDesign;
-		if (!this.validate(this)) {
+		if (!Design.validate(this)) {
 			this.design = old;
 			throw new Error(`Invalid design layout: ${newDesign}`)
 		}

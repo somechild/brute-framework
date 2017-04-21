@@ -11,12 +11,14 @@ export default class Pattern {
 	 */
 	constructor(pattern) {
 		this._id = uuid();
+		
+		let insertionAttempts = maxAttempts;
 		while(!Weaver.insert(this) && insertionAttempts --> 0)
 			this._id = uuid();
 		if (!insertionAttempts) throw new Error('Unexpected error initializing ${this.constructor.name} class with pattern ${pattern}');
 
 		this.pattern = pattern;
-		if (!this.validate(this)) throw new Error(`Invalid pattern: ${pattern}`);
+		if (!Pattern.validate(this)) throw new Error(`Invalid pattern: ${pattern}`);
 	}
 
 	/**
@@ -38,7 +40,7 @@ export default class Pattern {
 	set breakdown(newPattern) {
 		const old = this.pattern;
 		this.pattern = newPattern;
-		if(!this.validate(this)) {
+		if(!Pattern.validate(this)) {
 			this.pattern = old;
 			throw new Error(`Invalid pattern: ${pattern}`);
 		};

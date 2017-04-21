@@ -1,4 +1,4 @@
-import ExpressionEvaulator from './ExpressionEvaulator';
+import ExpressionEvaluator from './ExpressionEvaluator';
 import utils from './utils';
 
-module.exports = [...ExpressionEvaulator, ...utils];
+module.exports = [...ExpressionEvaluator, ...utils];

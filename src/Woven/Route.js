@@ -1,6 +1,9 @@
 import { Weaver } from '../helpers/utils';
 import { maxWovenInsertionAttempts as maxAttempts } from '../helpers/constants';
 
+import DataModel from './DataModel';
+import PageContainer from './PageContainer';
+
 const fs = require('fs');
 const uuid = require('uuid');
 
@@ -14,8 +17,10 @@ export default class Route {
 	constructor(design, config) {
 		let { templatePath, name } = config;
 
-		this.name = name;
+		this.$name = name;
 		this._id = uuid();
+
+		let insertionAttempts = maxAttempts;
 		while(!Weaver.insert(this) && insertionAttempts --> 0)
 			this._id = uuid();
 		if (!insertionAttempts) throw new Error('Unexpected error initializing ${this.constructor.name} class with route name ${name}');
@@ -32,7 +37,7 @@ export default class Route {
 	}
 
 	get name() {
-		return this.name;
+		return this.$name;
 	}
 
 	/**

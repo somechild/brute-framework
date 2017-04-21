@@ -13,10 +13,11 @@ export default class Collection {
 	 */
 	constructor(name, schema, indexByProp) {
 		this._id = uuid();
-		let insertionAttempt = Collector.addCollection(this);
-		if (!insertionAttempt) throw new Error('Unexpected error initializing ${this.constructor.name} class with name ${name}. Ensure a collection with the same name has not already been created.');
-
 		this.$name = name;
+		
+		let insertionAttempt = Collector.addCollection(this);
+		if (!insertionAttempt) throw new Error(`Unexpected error initializing ${this.constructor.name} class with name ${name}. Ensure a collection with the same name has not already been created.`);
+
 		this.setSchema(schema);
 		this.indexingProp = indexByProp;
 		this.entries = new Map();

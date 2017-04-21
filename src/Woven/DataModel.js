@@ -1,6 +1,9 @@
 import { Collector, Weaver } from '../helpers/utils';
 import { maxWovenInsertionAttempts as maxAttempts } from '../helpers/constants';
 
+import Design from './Design';
+import Route from './Route';
+
 const uuid = require('uuid');
 
 export default class DataModel {
@@ -32,10 +35,10 @@ export default class DataModel {
 	 * @return old design
 	 */
 	setDesign(newDesign) {
-		if (!Design.validate(design))
+		if (!Design.validate(newDesign))
 			throw new Error("Invalid design structure");
 		const old = this.design;
-		this.design = design;
+		this.design = newDesign;
 		return old;
 	}
 

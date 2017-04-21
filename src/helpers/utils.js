@@ -3,7 +3,7 @@ import Collection from '../Woven/Collection';
 
 const uuid = require('uuid')
 const cheerio = require('cheerio');
-const handlebars = require('handlebars/runtime');
+const handlebars = require('handlebars');
 
 /** Objects & Classes **/
 /**
@@ -143,7 +143,7 @@ export class TemplateProcessor {
 	 * @return old template
 	 */
 	setTemplate(template) {
-		if (!this.validateTemplate(template)) throw new Error('Invalid template format');
+		if (!TemplateProcessor.validateTemplate(template)) throw new Error('Invalid template format');
 		const old = this.template;
 		this.template = template;
 		return old;
@@ -165,7 +165,8 @@ export class TemplateProcessor {
 	static validateTemplate(template) {
 		let returner;
 		try {
-			let compiledTemplate = handlebars.compile(this.template);
+			let compiledTemplate = handlebars.compile(template);
+			let data = {};
 			returner = compiledTemplate(data) && true;
 		} catch(e) {
 			console.log(e.message + '\n');

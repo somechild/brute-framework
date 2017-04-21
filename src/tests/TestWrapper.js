@@ -19,8 +19,9 @@ export default class TestWrapper {
 
 
 	success() {
-		if (isVerbose) {
-			console.log('\x1b[32m', `${this.testpath}\n${this.testname} completed successfully.\n`);
+		if (this.isVerbose) {
+			console.log('\x1b[32m', `${this.testpath}\n${this.testname} completed successfully.`);
+			console.log('\x1b[0m', '\n')
 		};
 	}
 
@@ -29,10 +30,10 @@ export default class TestWrapper {
 	 */
 	failed(message) {
 		console.log('\x1b[31m', `${this.testpath}\n${this.testname} failed`);
-		if (isVerbose) {
+		if (this.isVerbose) {
 			console.log('\x1b[31m',' with result:\n');
-			console.log('\x1b[31m',message);
-			console.log('\n');
+			console.log('\x1b[31m', message);
 		};
+		console.log('\x1b[0m', '\n');
 	}
 }

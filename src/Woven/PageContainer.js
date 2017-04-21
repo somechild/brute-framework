@@ -3,6 +3,7 @@ import { maxWovenInsertionAttempts as maxAttempts } from '../helpers/constants';
 
 const uuid = require('uuid');
 const fs = require('fs');
+const _path_ = require('path');
 
 export default class PageContainer {
 	/**
@@ -13,6 +14,8 @@ export default class PageContainer {
 	 */
 	constructor(templatePath) {
 		this._id = uuid();
+		
+		let insertionAttempts = maxAttempts;
 		while(!Weaver.insert(this) && insertionAttempts --> 0)
 			this._id = uuid();
 		if (!insertionAttempts) throw new Error('Unexpected error initializing ${this.constructor.name} class with template path ${templatePath}');
@@ -32,8 +35,9 @@ export default class PageContainer {
 	 * @return old path
 	 */
 	setTemplate(path) {
+		path = _path_.normalize(path);
 		if (!fs.existsSync(path)) throw new Error(`File does not exist at ${path}`);
-		if (!TemplateProcessor.validateTemplate(fs.readFileSync(this.getTemplatePath(), 'utf-8'))) throw new Error(`File at path ${path} is an invalid template format`);
+		if (!TemplateProcessor.validateTemplate(fs.readFileSync(path, 'utf-8'))) throw new Error(`File at path ${path} is an invalid template format`);
 		const old = this.templatePath;
 		this.templatePath = path;
 		return old;

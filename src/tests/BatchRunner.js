@@ -24,7 +24,7 @@ export default class BatchRunner {
 	queue(processItem) {
 		let toAdd = processItem;
 		if (typeof this.wrapper != "undefined") {
-			toAdd = new wrapper(toAdd, ...this.wrapperRunArgs);
+			toAdd = new this.wrapper(toAdd, ...this.wrapperRunArgs);
 		};
 		this.processes.push(toAdd);
 	}
