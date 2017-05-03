@@ -5,6 +5,8 @@ import Collection from '../../Woven/Collection';
 import Design from '../../Woven/Design';
 import TestHelpers from '../TestHelpers.js';
 
+let assert = new TestHelpers.Assertions();
+
 let test = function() {
 	let UsersTest = new Collection("UsersTest", TestHelpers.getSampleSchema("UsersTest"), "name");
 	let GeneralInfoTest = new Collection("GeneralInfoTest", TestHelpers.getSampleSchema("GeneralInfoTest"), "email");
@@ -17,6 +19,7 @@ let test = function() {
 		templatePath: (__dirname + '/../../../Samples/SampleTemplate.html'),
 		name: "test",
 	});
+
 
 	
 	

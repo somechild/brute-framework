@@ -1,4 +1,10 @@
+import { Assertions, ErrorCollector } from './assertions';
+
 export default {
+
+	Assertions,
+	ErrorCollector,
+
 	getSampleDesign() {
 		return {
 			"userInfo": {
