@@ -36,11 +36,11 @@ export default class BatchRunner {
 	run() {
 		if (typeof this.wrapper != "undefined") {
 			for (let processItem of this.processes) {
-				const {isSuccess, result} = processItem.main();
+				const {isSuccess, message} = processItem.main();
 				if (isSuccess) {
 					processItem.success();
 				} else {
-					processItem.failed(result);
+					processItem.failed(message);
 				};
 			}
 		} else {

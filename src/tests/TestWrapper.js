@@ -21,17 +21,17 @@ export default class TestWrapper {
 	success() {
 		if (this.isVerbose) {
 			console.log('\x1b[32m', `${this.testpath}\n${this.testname} completed successfully.`);
-			console.log('\x1b[0m', '\n')
+			console.log('\x1b[0m', '\n');
 		};
 	}
 
 	/**
-	 * @message: returned result of failed test
+	 * @message: returned message of failed test
 	 */
 	failed(message) {
 		console.log('\x1b[31m', `${this.testpath}\n${this.testname} failed`);
 		if (this.isVerbose) {
-			console.log('\x1b[31m',' with result:\n');
+			console.log('\x1b[31m',' with message:\n');
 			console.log('\x1b[31m', message);
 		};
 		console.log('\x1b[0m', '\n');

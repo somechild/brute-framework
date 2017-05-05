@@ -23,7 +23,7 @@ export default class Route {
 		let insertionAttempts = maxAttempts;
 		while(!Weaver.insert(this) && insertionAttempts --> 0)
 			this._id = uuid();
-		if (!insertionAttempts) throw new Error('Unexpected error initializing ${this.constructor.name} class with route name ${name}');
+		if (!insertionAttempts) throw new Error(`Unexpected error initializing ${this.constructor.name} class with route name ${name}`);
 
 		const model = new DataModel(design, this);
 		const pageContainer = new PageContainer(templatePath);

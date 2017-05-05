@@ -8,21 +8,24 @@ export class Assertions {
 	 * @return String if failure
 	 */
 
+	/**
+	 * @param weakEquality: true if expected and result should be compared with two equal signs OR if they are objects, to compare them with a deep match
+	 */
 	equals(expected, result, message, weakEquality) {
 		if ((!weakEquality && expected === result) || (weakEquality && expected == result)) {
 			return;
 		} else if(weakEquality && typeof expected == "object" && typeof result == "object" && deepMatch(expected, result)) {
 			return;
 		} else {
-			return _handleFailure(message || `${expected} does not equal ${result}`);
+			return this._handleFailure(message || `${expected} does not equal ${result}`);
 		};
 	}
 
 	truthy(result, message) {
-		if (result == true) {
+		if (result) {
 			return;
 		} else {
-			return _handleFailure(message || `${result} is not truthy`);
+			return this._handleFailure(message || `${result} is not truthy`);
 		};
 	}
 
@@ -30,7 +33,7 @@ export class Assertions {
 		if (result == false) {
 			return;
 		} else {
-			return _handleFailure(message || `${result} is not truthy`);
+			return this._handleFailure(message || `${result} is not truthy`);
 		};
 	}
 
@@ -70,27 +73,34 @@ export class Assertions {
 
 export class ErrorCollector {
 	constructor() {
-
+		this.messages = [];
 	}
 
 	/**
 	 * @param message: String - error message to add
+	 * @throws Error if message is not of type string
 	 */
 	add(message) {
+		if (typeof message != "string") throw new Error(`${message} should be of type String`);
 
+		this.messages.push(message);
 	}
 
 	/**
-	 * @return [String]
+	 * @return [string]: copy of 'this.messages'
 	 */
 	get errors() {
-
+		return this.messages.slice();
 	}
 
 	/**
-	 * @param formatted: Boolean - true if color format printed errors
+	 * @param formatted: boolean - true if color format printed errors
 	 */
 	printErrors(formatted) {
-
+		if (!formatted)
+			this.messages.forEach((message) => console.log(message));
+		else
+			this.messages.forEach((message) => console.log('\x1b[31m', `Error: ${message}`));
+		console.log('\x1b[0m', '\n'); // clear console font color from red
 	}
 }
