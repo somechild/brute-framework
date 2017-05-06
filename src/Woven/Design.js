@@ -1,4 +1,4 @@
-import { Weaver } from '../helpers/utils';
+import { Weaver, Collector } from '../helpers/utils';
 import { maxWovenInsertionAttempts as maxAttempts } from '../helpers/constants';
 
 const uuid = require('uuid');
@@ -9,9 +9,10 @@ export default class Design {
 
 	static getRequiredItems() {
 		return {
-			requiredProps: ["collection", "items", "uniqueByItem"],
-			dynamicRequiredProps: ["endpoint"],
-			staticRequiredProps: ["matchPattern"],
+			requiredProps: ["collection", "items"], // generally required
+
+			dynamicRequiredProps: ["endpoint"], // for dynamic fields (defined by route queries)
+			staticRequiredProps: ["matchPattern"], // for staticly defined fields (predefined in design)
 		};
 	}
 
@@ -23,10 +24,8 @@ export default class Design {
 	 * @throws Error if unexpected error initializing page with unique id
 	 */
 	constructor(design) {
-		this.design = design;
-		if(!Design.validate(this))
-			throw new Error(`Invalid design layout: ${design}`);
-		
+		this.layout = design;
+
 		this._id = uuid();
 		let insertionAttempts = maxAttempts;
 		while(!Weaver.insert(this) && insertionAttempts --> 0)
@@ -51,10 +50,22 @@ export default class Design {
 	set layout(newDesign) {
 		const old = this.design;
 		this.design = newDesign;
+
 		if (!Design.validate(this)) {
 			this.design = old;
 			throw new Error(`Invalid design layout: ${newDesign}`)
 		}
+
+		// update all the undefined uniqueByItems to conform to associated collection's configurations
+		for (let prop in newDesign) {
+			const descriptionItem = newDesign[prop];	
+			if (typeof descriptionItem.uniqueByItem == "undefined") {
+				const uniqueBy = Collector.getQuerier().with(descriptionItem.collection).getContext().indexingProp; // should not throw error as we just validated existence of associated Collection instance in 'Design.validate(this)''
+				newDesign[prop].uniqueByItem = uniqueBy;
+			}
+		}
+
+		this.design = newDesign; // update design with the newly filled 'uniqueByItem' fields
 		return old;
 	}
 
@@ -66,7 +77,7 @@ export default class Design {
 	static validate(o) {
 		if (!(o instanceof Design)) return false;
 
-		const layout = o.layout;
+		let layout = o.layout;
 			if (!layout || typeof layout != "object" || Array.isArray(layout)) return false;
 
 		const { requiredProps, dynamicRequiredProps, staticRequiredProps } = this.getRequiredItems();
@@ -84,6 +95,24 @@ export default class Design {
 				for (let requiredProp of staticRequiredProps) {
 					if (!(requiredProp in descriptionItem)) return false;
 				}
+			};
+
+			let CollectionExists = true;
+			let collectionItem = Collector.getQuerier();
+			try {
+				collectionItem.with(descriptionItem.collection); // throws error if collection with name in param does not exist
+			} catch(e) {
+				CollectionExists = false;
+			}
+			if (!CollectionExists) {
+				return console.log(`${descriptionItem.collection} is not a defined collection.`) && false;
+			} else {
+				collectionItem = collectionItem.getContext(); // get the actual collection instance
+			};
+
+			let uniqueBy = collectionItem.indexingProp;
+			if(typeof descriptionItem.uniqueByItem != "undefined" && descriptionItem.uniqueByItem != uniqueBy) {
+				return console.log(`Invalid 'uniqueByItem' property value: ${descriptionItem.uniqueByItem}. The collection ${descriptionItem.collection}'s unique property is already set to ${uniqueBy}. Your design's 'uniqueByItem' property value should match.`) && false;
 			};
 		}
 

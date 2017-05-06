@@ -70,7 +70,7 @@ export default class Page {
 			if (!template) throw new Error(`Page with id ${this.id} does not belong to a container.`);
 			template = template.getTemplate();
 			let processor = new TemplateProcessor(template);
-
+			
 			fs.writeFileSync(filePath, processor.processWith(this.context));
 
 			this.contextHasChanged = false;

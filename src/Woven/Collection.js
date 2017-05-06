@@ -165,7 +165,7 @@ export default class Collection {
 	 */ 
 	get(key, value, multi) {
 		if (key === this.indexingProp) {
-			return multi? (this.entries.get(value)? [this.entries.get(value)]: undefined): this.entries.get(value);
+			return multi? (this.entries.get(value) && [this.entries.get(value)]): this.entries.get(value);
 		} else {
 			let returner = multi && [];
 			const entries = this.entries.entries();
@@ -178,7 +178,7 @@ export default class Collection {
 			}
 			return returner;
 		};
-		return multi? []: undefined;
+		return multi && [];
 	}
 
 	/**
@@ -205,7 +205,7 @@ export default class Collection {
 	 * @return iterable of all entries stored in collection
 	 */
 	findAll() {
-		return this.entries.values();
+		return Array.from(this.entries.values());
 	}
 
 	/**

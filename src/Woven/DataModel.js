@@ -77,21 +77,23 @@ export default class DataModel {
 		const design = this.design.layout;
 		let querier = Collector.getQuerier();
 
+		let hasSomeResults;
 		for (let sectionName in design) {
 			const section = design[sectionName];
 			let query = {};
 			query[section.uniqueByItem] = section.matchPattern || pattern.breakdown[section.endpoint];
 			let matches = querier.with(section.collection).find(query);
-			if (!matches)
-				throw new Error(`No matches found for pattern ${pattern}`);
+			if (!matches || !matches.length)
+				continue;
+
+			hasSomeResults = true;
 			matches = unwrap(matches);
-			
 			o[sectionName] = Pattern.parseResults({
 				matches,
 				originalExpression: query[section.uniqueByItem],
 				items: section.items,
 			});
 		}
-		return o;
+		return hasSomeResults && o;
 	}
 }

@@ -81,7 +81,7 @@ export default class Route {
 		const pageContainer = this.pageContainer;
 
 		const data = model.getDataInstance(pattern);
-		if (!data || !data.length)
+		if (!data)
 			return;
 		const page = pageContainer.getPageWithData(pattern, data);
 

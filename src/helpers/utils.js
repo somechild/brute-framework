@@ -121,6 +121,13 @@ class CollectionQuerier {
 
 		return [];
 	}
+
+	/** 
+	 * @return Collection if context has been defined
+	 */
+	getContext() {
+		return this.context;
+	}
 };
 
 /**
@@ -340,8 +347,9 @@ export function unwrap(arr) {
 	let unwrapped = [];
 	for (var i = 0; i < arr.length; i++) {
 		if (arr[i] instanceof EntryWrapper) {
-			unwrapped.push(arr[i].value);
-		} else if (Array.isArray(arr[i])) {
+			arr[i] = arr[i].value;
+		}
+		if (Array.isArray(arr[i])) {
 			let temp = unwrap(arr[i]);
 			for (let item of temp) {
 				unwrapped.push(item);

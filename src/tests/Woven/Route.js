@@ -8,6 +8,7 @@ import Pattern from '../../Woven/Pattern';
 import TestHelpers from '../TestHelpers';
 import { Weaver } from '../../helpers/utils';
 
+const fs = require('fs');
 const _path_ = require('path');
 
 const SampleTemplatePath = __dirname + '/../../../Samples/SampleTemplate.html';
@@ -17,7 +18,7 @@ const SampleRouteName = "test";
 
 let test = function() {
 	let UsersTest = new Collection("UsersTest", TestHelpers.getSampleSchema("UsersTest"), "name");
-	let GeneralInfoTest = new Collection("GeneralInfoTest", TestHelpers.getSampleSchema("GeneralInfoTest"), "email");
+	let GeneralInfoTest = new Collection("GeneralInfoTest", TestHelpers.getSampleSchema("GeneralInfoTest"), "key");
 
 	let sampleDesign = new Design(TestHelpers.getSampleDesign());
 
@@ -109,7 +110,23 @@ let test = function() {
 
 		assert.falsey(route.getFileWithPattern(TestPattern), 'getFileWithPattern method does not return undefined when there is no data matching given pattern.');
 
-		// TODO: more
+		UsersTest.insert({
+			name: "John",
+		});
+
+		assert.truthy(fs.existsSync(route.getFileWithPattern(TestPattern)), 'getFileWithPattern does not return file path for partial model data existing in Collections');
+
+		GeneralInfoTest.insert({
+			"key": 1,
+			"phonenumber": "4164443333",
+		});
+		GeneralInfoTest.insert({
+			"key": 2,
+			"email": "fdsa@asdf.com",
+			"phonenumber": "4164442222",
+		});
+
+		assert.truthy(fs.existsSync(route.getFileWithPattern(TestPattern)), 'getFileWithPattern does not return file path for all model data existing in Collections');
 
 	}
 

@@ -3,16 +3,16 @@ export default {
 		return {
 			"userInfo": {
 				"collection": "UsersTest",
+				"uniqueByItem": "name", // optional (mainly here for reference purposes) should be the unique indexing prop defined in associated Collection
 				"items": ["name", "username", "profileImage"],
-				"uniqueByItem": "name",
 				"useDynamicPattern": true,
-				"endpoint": "user"
+				"endpoint": "user",
 			},
 			"footerContactInfo": {
 				"collection": "GeneralInfoTest",
+				"uniqueByItem": "key", // should be the unique indexing prop defined in associated Collection
 				"items": ["email", "phonenumber"],
-				"uniqueByItem": "key",
-				"matchPattern": "*"
+				"matchPattern": "*",
 			}
 		};
 	},
@@ -35,6 +35,10 @@ export default {
 			},
 			"phonenumber": {
 				type: "string",
+			},
+			"key": {
+				type: "number",
+				required: true,
 			}
 		};
 	},
