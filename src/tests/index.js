@@ -45,18 +45,16 @@ runner.run();
 // clean up file dump
 
 function emptyDir(dirPath) { // empty dir method
-	fs.readdir(dirPath, function(err, files) {
+	fs.readdir(dirPath, (err, files) => {
 		if (err) return console.log(err);
 		if (!files.length) return;
 
-		files.forEach(function(file) {
+		files.forEach((file) => {
 			const filePath = dirPath + file;
-			fs.stat(filePath, function(err, stats) {
+			fs.stat(filePath, (err, stats) => {
 				if (err) return console.log(err);
 				if (stats.isFile()) {
-					fs.unlink(filePath, function(err) {
-						if (err) return console.log(err);
-					});
+					fs.unlink(filePath, (err) => { if(err) console.log(err); });
 				} else if (stats.isDirectory()) {
 					emptyDir(filePath + '/');
 				}

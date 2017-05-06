@@ -1,4 +1,5 @@
 import Route from '../../Woven/Route';
+import describe from '../describe';
 
 //aux
 import { Assertions, ErrorCollector } from '../assertions';
@@ -16,7 +17,14 @@ const SampleTemplatePath_ALT = __dirname + '/../../../Samples/SampleTemplate_COP
 const SampleTemplatePath_INVALID = '^@  12131asdf~4.../asdf/.\/';
 const SampleRouteName = "test";
 
-let test = function() {
+// create test
+
+const RouteTest = describe({
+	testName: 'Route tests', 
+	testedFilePath: (__dirname + '../../Woven/Route'),
+});
+
+RouteTest.addTest(function() {
 	let UsersTest = new Collection("UsersTest", TestHelpers.getSampleSchema("UsersTest"), "name");
 	let GeneralInfoTest = new Collection("GeneralInfoTest", TestHelpers.getSampleSchema("GeneralInfoTest"), "key");
 
@@ -110,6 +118,7 @@ let test = function() {
 
 		assert.falsey(route.getFileWithPattern(TestPattern), 'getFileWithPattern method does not return undefined when there is no data matching given pattern.');
 
+		//TODO: move to TestHelpers
 		UsersTest.insert({
 			name: "John",
 		});
@@ -131,22 +140,10 @@ let test = function() {
 
 	}
 
-		
-	if (collector.errors.length > 0) {
-		return {
-			isSuccess: false,
-			message: 'the Route class has experienced the following failures: ' + collector.errors.join('\n') + '\n\n',
-		}
-	};
 	return {
-		isSuccess: true,
-		message: null,
+		isSuccess: collector.errors.length === 0,
+		message: collector.errors.length > 0 ? ('the Route class has experienced the following failures: ' + collector.errors.join('\n') + '\n\n') : null,
 	}
-}
+});
 
-
-export default [{
-	name: 'Route tests',
-	path: '../../Woven/Route',
-	body: test,
-}]
+export default RouteTest.finalize();
