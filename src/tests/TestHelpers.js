@@ -38,4 +38,9 @@ export default {
 			}
 		};
 	},
+	getSamplePattern() { // conforming to sample design
+		return {
+			"user": "John", // sample design defines 'user' endpoint to match with 'name' field (uniqueByItem)
+		}
+	},
 };

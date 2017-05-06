@@ -23,15 +23,16 @@ export default class Design {
 	 * @throws Error if unexpected error initializing page with unique id
 	 */
 	constructor(design) {
+		this.design = design;
+		if(!Design.validate(this))
+			throw new Error(`Invalid design layout: ${design}`);
+		
 		this._id = uuid();
 		let insertionAttempts = maxAttempts;
 		while(!Weaver.insert(this) && insertionAttempts --> 0)
 			this._id = uuid();
 		if (!insertionAttempts) throw new Error('Unexpected error initializing ${this.constructor.name} class with design ${design}');
 
-		this.design = design;
-		if(!Design.validate(this))
-			throw new Error(`Invalid design layout: ${design}`);
 	}
 
 	get layout() {

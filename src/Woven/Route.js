@@ -3,6 +3,7 @@ import { maxWovenInsertionAttempts as maxAttempts } from '../helpers/constants';
 
 import DataModel from './DataModel';
 import PageContainer from './PageContainer';
+import Pattern from './Pattern';
 
 const fs = require('fs');
 const uuid = require('uuid');
@@ -72,7 +73,7 @@ export default class Route {
 	 * get HTML file based on Pattern instance
 	 * @param pattern instance to match file against
 	 * @throws Error if pattern is invalid
-	 * @return path to file matching pattern
+	 * @return path to file matching pattern OR undefined if no file matching pattern/data
 	 */
 	getFileWithPattern(pattern) {
 		if (!Pattern.validate(pattern)) throw new Error(`Invalid pattern ${pattern}`);
@@ -80,6 +81,8 @@ export default class Route {
 		const pageContainer = this.pageContainer;
 
 		const data = model.getDataInstance(pattern);
+		if (!data || !data.length)
+			return;
 		const page = pageContainer.getPageWithData(pattern, data);
 
 		return page.getFile();

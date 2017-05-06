@@ -30,7 +30,7 @@ export class Assertions {
 	}
 
 	falsey(result, message) {
-		if (result == false) {
+		if (!result) {
 			return;
 		} else {
 			return this._handleFailure(message || `${result} is not truthy`);

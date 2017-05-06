@@ -86,6 +86,7 @@ class CollectionQuerier {
 	 * set the context of the proceeding queries
 	 * @param collectionName: name of the collection the be queried
 	 * @throws Error if collection with name of 'collectionName' does not exist
+	 * @return self for method chaining
 	 */
 	with(collectionName) {
 		let collection;
@@ -93,6 +94,8 @@ class CollectionQuerier {
 			throw new Error("Collection with name '${collectionName}' does not exist.")
 
 		this.context = collection;
+
+		return this;
 	}
 
 	/**
@@ -106,7 +109,7 @@ class CollectionQuerier {
 	 				if niether john, nor john AND jane exist, fallback to an entry with name set to 'jackie'
 	 */
 	find(queryObj) {
-		if (this.context instanceof Colection && typeof queryObj == "object" && Object.keys(queryObj).length === 1) {
+		if (this.context instanceof Collection && typeof queryObj == "object" && Object.keys(queryObj).length === 1) {
 			const key = Object.keys(queryObj)[0];
 			let expression = queryObj[key];
 			if (expression == '*') {
@@ -307,6 +310,7 @@ export function getConfigs() {
  * @return value of final property or returned value of executeOnSuccess method if successful. undefined if failed.
  */
 export function getSafe(o, str, executeOnSuccess) {
+	if (typeof o != "object" || Array.isArray(o)) return;
 	let runner = o;
 	const props = str.split('.');
 	for (let prop of props) {
@@ -327,7 +331,7 @@ export function println(str) {
 
 /**
  * Unwrap array with non-array items nested in sub-arrays
- * Note: this method will also unwrap values from EntryWrapper objects
+ * NOTE: this method will also unwrap values from EntryWrapper objects
  * Ex. [['joe', 'jane'], 'jordan', ['jack', ['jill', 'jeff']]] --> ['joe', 'jane', 'jordan', 'jack', 'jill', 'jeff']
  * @param arr: array to unwrap
  * @return unwrapped array

@@ -8,6 +8,9 @@ import TestWrapper from './TestWrapper';
 
 // create framework space in global scope
 import { Collector, Weaver } from '../helpers/utils';
+
+const _path_ = require('path');
+
 Weaver.initializeSpace([
 	'Collection',
 	'DataModel',
@@ -19,6 +22,12 @@ Weaver.initializeSpace([
 ]);
 
 Collector.initializeSpace();
+
+global.bruteframework.configs = { // initialize dummy configs
+	general: {
+		pageStorePath: _path_.normalize(__dirname + "../../../Samples/TestPageDump/"),
+	},
+};
 
 const weaveProcesses = require('./Woven');
 const helpersProcesses = require('./helpers');

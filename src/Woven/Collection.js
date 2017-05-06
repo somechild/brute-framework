@@ -12,15 +12,17 @@ export default class Collection {
 	 * @throws Error if unexpected error initializing page with unique id
 	 */
 	constructor(name, schema, indexByProp) {
-		this._id = uuid();
 		this.$name = name;
-		
-		let insertionAttempt = Collector.addCollection(this);
-		if (!insertionAttempt) throw new Error(`Unexpected error initializing ${this.constructor.name} class with name ${name}. Ensure a collection with the same name has not already been created.`);
 
 		this.setSchema(schema);
 		this.indexingProp = indexByProp;
 		this.entries = new Map();
+		
+		this._id = uuid();
+		
+		let insertionAttempt = Collector.addCollection(this);
+		if (!insertionAttempt) throw new Error(`Unexpected error initializing ${this.constructor.name} class with name ${name}. Ensure a collection with the same name has not already been created.`);
+
 	}
 
 	get id() {
@@ -99,7 +101,7 @@ export default class Collection {
 
 	/**
 	 * validate an entry against currently set schema
-	 * Note: fill the default required properties using fillDefaultValues(entry) method
+	 * NOTE: fill the default required properties using fillDefaultValues(entry) method
 	 * @param o: variable to validate against schema
 	 * @return true if valid
 	 */
@@ -155,7 +157,7 @@ export default class Collection {
 
 	/**
 	 * get an entry by key and value
-	 * Note: if key is the unique indexing property, then retrieval by value will be quicker
+	 * NOTE: if key is the unique indexing property, then retrieval by value will be quicker
 	 * @param key: string -- key to compare value to for entry retrieval
 	 * @param value: value to match entry with
 	 * @param multi: boolean -- true if return in array form (return all matching entries)
@@ -163,7 +165,7 @@ export default class Collection {
 	 */ 
 	get(key, value, multi) {
 		if (key === this.indexingProp) {
-			return multi? [this.entries.get(value)]: this.entries.get(value);
+			return multi? (this.entries.get(value)? [this.entries.get(value)]: undefined): this.entries.get(value);
 		} else {
 			let returner = multi && [];
 			const entries = this.entries.entries();
@@ -221,7 +223,7 @@ export default class Collection {
 
 	/**
 	 * remove entry from collection
-	 * Note: removal would be quicker if key is the unique indexing property
+	 * NOTE: removal would be quicker if key is the unique indexing property
 	 * @param key: key to match value with
 	 * @param value: value to match against
 	 * @return deleted entry or undefined

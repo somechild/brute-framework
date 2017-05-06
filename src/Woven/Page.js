@@ -14,18 +14,19 @@ export default class Page {
 	 * @throws Error if unexpected error initializing page with unique id
 	 */
 	constructor(data, pattern, containerId) {
-		this._id = uuid();
-		let insertionAttempts = maxAttempts;
-		while(!Weaver.insert(this) && insertionAttempts --> 0)
-			this._id = uuid();
-		if (!insertionAttempts) throw new Error('Unexpected error initializing ${this.constructor.name} class with id ${this.id} & data ${data}');
-
 		this.context = data;
 		this.pattern = pattern;
 		this.pageContainer = containerId;
 		this.contextHasChanged = true;
 
 		this.getFile(); // force creation of a file
+		
+		this._id = uuid();
+		let insertionAttempts = maxAttempts;
+		while(!Weaver.insert(this) && insertionAttempts --> 0)
+			this._id = uuid();
+		if (!insertionAttempts) throw new Error('Unexpected error initializing ${this.constructor.name} class with id ${this.id} & data ${data}');
+
 	}
 
 	/**

@@ -1,8 +1,9 @@
-import { Collector, Weaver } from '../helpers/utils';
+import { Collector, unwrap, Weaver } from '../helpers/utils';
 import { maxWovenInsertionAttempts as maxAttempts } from '../helpers/constants';
 
 import Design from './Design';
 import Route from './Route';
+import Pattern from './Pattern';
 
 const uuid = require('uuid');
 
@@ -13,17 +14,17 @@ export default class DataModel {
 	 * @throws Error if unexpected error initializing page with unique id
 	 */
 	constructor(design, route) {
+		if (route instanceof Route) {
+			this.$routeId = route.id;
+		};
+
+		this.design = design;
+		
 		this._id = uuid();
 		let insertionAttempts = maxAttempts;
 		while(!Weaver.insert(this) && insertionAttempts --> 0)
 			this._id = uuid();
 		if (!insertionAttempts) throw new Error('Unexpected error initializing ${this.constructor.name} class with model design ${desgin}');
-
-		if (route instanceof Route) {
-			this.route = route.id;
-		};
-
-		this.setDesign(design);
 	}
 
 	get id() {
@@ -34,26 +35,34 @@ export default class DataModel {
 	 * @param newDesign: set a new design for the datamodel
 	 * @return old design
 	 */
-	setDesign(newDesign) {
+	set design(newDesign) {
 		if (!Design.validate(newDesign))
 			throw new Error("Invalid design structure");
 		const old = this.design;
-		this.design = newDesign;
+		this.$designId = newDesign.id;
 		return old;
+	}
+
+	get design() {
+		return Weaver.query('Design', this.$designId);
 	}
 
 	/** 
 	 * @param newRoute: associated datamodel with a new route (route must already have this DataModel set as its model)
 	 * @return old routeId
 	 */
-	setRoute(newRoute) {
-		if (newRoute instanceof Route && newRoute.getModel() === this.id) {
+	set route(newRoute) {
+		if (newRoute instanceof Route && newRoute.model === this) {
 			const old = this.route; 
-			this.route = newRoute.id;
+			this.$routeId = newRoute.id;
 			return old;
 		} else {
 			throw new Error(`Route object is invalid, or does not point to this model already.`);
 		};
+	}
+
+	get route() {
+		return Weaver.query('Route', this.$routeId);
 	}
 
 	/**
@@ -72,9 +81,10 @@ export default class DataModel {
 			const section = design[sectionName];
 			let query = {};
 			query[section.uniqueByItem] = section.matchPattern || pattern.breakdown[section.endpoint];
-			const matches = querier.with(section.collection).find(query);
+			let matches = querier.with(section.collection).find(query);
 			if (!matches)
 				throw new Error(`No matches found for pattern ${pattern}`);
+			matches = unwrap(matches);
 			
 			o[sectionName] = Pattern.parseResults({
 				matches,

@@ -1,4 +1,4 @@
-import { unwrap, Weaver } from '../helpers/utils';
+import { Weaver } from '../helpers/utils';
 import { maxWovenInsertionAttempts as maxAttempts } from '../helpers/constants';
 
 const uuid = require('uuid');
@@ -6,19 +6,24 @@ const uuid = require('uuid');
 export default class Pattern {
 	/**
 	 * @param pattern: object - pattern to wrap in an instance of this class
+	 * 				  NOTE: this is an object whose fields are the unique endpoints of a route, and values are the value in the endpoint request
+	 * 				  ex. if data is to be queried by the 'name' field specified in design (uniqueBy), the pattern will look like this (sample route request may be: '/users?name=John||Jane' or '/users/name/John||Jane')
+	 * 					 {
+							"users": "John||Jane",
+						 }
 	 * @throws Error if pattern is invalid
 	 * @throws Error if unexpected error initializing page with unique id
 	 */
 	constructor(pattern) {
 		this._id = uuid();
+
+		this.pattern = pattern;
+		if (!Pattern.validate(this)) throw new Error(`Invalid pattern: ${pattern}`);
 		
 		let insertionAttempts = maxAttempts;
 		while(!Weaver.insert(this) && insertionAttempts --> 0)
 			this._id = uuid();
 		if (!insertionAttempts) throw new Error('Unexpected error initializing ${this.constructor.name} class with pattern ${pattern}');
-
-		this.pattern = pattern;
-		if (!Pattern.validate(this)) throw new Error(`Invalid pattern: ${pattern}`);
 	}
 
 	/**
@@ -48,7 +53,7 @@ export default class Pattern {
 	}
 
 	/**
-	 * Note: this is effectively a hashcode
+	 * NOTE: this is effectively a hashcode
 	 * @return alphabetically sorted string representation of pattern wrapped by the instance of this class
 	 */
 	stringify() {
@@ -81,9 +86,7 @@ export default class Pattern {
 	 */
 	static parseResults(matchObj) {
 		let { matches, originalExpression, items } = matchObj;
-		matches = unwrap(matches);
-
-		let queryDoesNotExpectArray = originalExpression.reduce((accum, curent, idx) => {
+		let queryDoesNotExpectArray = originalExpression.split('').reduce((accum, current, idx) => {
 			return accum && !((current == '&' || current == '^') && current == originalExpression[i+1])
 		}, true);
 
