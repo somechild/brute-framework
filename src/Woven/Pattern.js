@@ -85,6 +85,7 @@ export default class Pattern {
 	 * @return unwrapped and flattened array or single collection entry instance (if no AND or COMBINE logic used in originalExpression)
 	 */
 	static parseResults(matchObj) {
+		// TODO: return array of objects if query 'expects array', rather than making individual fields arrays
 		let { matches, originalExpression, items } = matchObj;
 		let queryDoesNotExpectArray = originalExpression.indexOf('*') != -1 ? false : originalExpression.split('').reduce((accum, current, idx) => {
 			return accum && !((current == '&' || current == '^') && current == originalExpression[i+1])

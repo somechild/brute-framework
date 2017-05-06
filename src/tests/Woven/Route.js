@@ -116,6 +116,7 @@ let test = function() {
 
 		assert.truthy(fs.existsSync(route.getFileWithPattern(TestPattern)), 'getFileWithPattern does not return file path for partial model data existing in Collections');
 
+		//TODO: move to TestHelpers
 		GeneralInfoTest.insert({
 			"key": 1,
 			"phonenumber": "4164443333",

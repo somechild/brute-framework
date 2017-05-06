@@ -1,5 +1,6 @@
 import { deepMatch } from '../helpers/utils';
 
+// i love this class
 export class Assertions {
 	/**
 	 * public methods for assertions
