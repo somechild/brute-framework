@@ -147,7 +147,7 @@ export default class Collection {
 	fillDefaultValues(entry) {
 		let defaultDefinedProps = extend({}, this.propsWithDefaults);
 		for (let prop in entry) {
-			if (prop in defaultDefinedProps)
+			if (typeof entry[prop] != "undefined" && prop in defaultDefinedProps)
 				delete defaultDefinedProps[prop];
 		};
 
