@@ -73,27 +73,30 @@ export default class DataModel {
 		if (!Pattern.validate(pattern))
 			throw new Error(`Invalid pattern ${pattern}`);
 
-		let o = {};
+		let toReturn = {};
 		const design = this.design.layout;
 		let querier = Collector.getQuerier();
 
 		let hasSomeResults;
 		for (let sectionName in design) {
 			const section = design[sectionName];
+			
 			let query = {};
 			query[section.uniqueByItem] = section.matchPattern || pattern.breakdown[section.endpoint];
+			
 			let matches = querier.with(section.collection).find(query);
 			if (!matches || !matches.length)
 				continue;
+			matches = unwrap(matches);
 
 			hasSomeResults = true;
-			matches = unwrap(matches);
-			o[sectionName] = Pattern.parseResults({
+			
+			toReturn[sectionName] = Pattern.parseResults({
 				matches,
 				originalExpression: query[section.uniqueByItem],
 				items: section.items,
 			});
 		}
-		return hasSomeResults && o;
+		return hasSomeResults && toReturn;
 	}
 }

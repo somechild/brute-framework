@@ -4,14 +4,13 @@
  */
 import BatchRunner from './BatchRunner';
 import TestWrapper from './TestWrapper';
-
-
-// create framework space in global scope
 import { Collector, Weaver } from '../helpers/utils';
 
 const fs = require('fs');
 const _path_ = require('path');
 
+
+// initialize global space for framework to operate on
 Weaver.initializeSpace([
 	'Collection',
 	'DataModel',
@@ -30,19 +29,23 @@ global.bruteframework.configs = { // initialize dummy configs
 	},
 };
 
+// get tests for 'Woven' and 'helpers' folders
 const weaveProcesses = require('./Woven');
 const helpersProcesses = require('./helpers');
 
+// this will run tests
 const runner = new BatchRunner(TestWrapper, [true]); // [true] is to ensure test result reports are verbose
 
+// add tests to batch runner
 for (let processItem of weaveProcesses.concat(helpersProcesses)) {
 	runner.queue(processItem);
 }
 
+// run tests
 runner.run();
 
 
-// clean up file dump
+// clean up file dump after tests complete
 
 function emptyDir(dirPath) { // empty dir method
 	fs.readdir(dirPath, (err, files) => {
@@ -64,6 +67,6 @@ function emptyDir(dirPath) { // empty dir method
 	});
 };
 
-//call
+// call emptyDir on page dump folder for tests
 const pathToClear = global.bruteframework.configs.general.pageStorePath;
 emptyDir(pathToClear);

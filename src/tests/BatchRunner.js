@@ -31,7 +31,6 @@ export default class BatchRunner {
 
 	/**
 	 * run the queued processes
-	 * TODO: use async threads
 	 */
 	run() {
 		if (typeof this.wrapper != "undefined") {

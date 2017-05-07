@@ -110,8 +110,12 @@ export default class Collection {
 		if (typeof o != "object" || Array.isArray(o)) return false;
 
 		let requiredPropsWithNoDefaultValues = extend({}, this.requiredWithNoDefault);
+		let requiredPropsWithDefaultValues = this.propsWithDefaults;
 		
 		for (let prop in o) {
+			if (typeof o[prop] == "undefined" && prop in requiredPropsWithDefaultValues)
+				continue;
+
 			const propDefinition = schema[prop];
 			if (typeof propDefinition == "undefined") return false;
 

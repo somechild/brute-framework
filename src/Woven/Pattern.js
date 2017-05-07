@@ -85,26 +85,30 @@ export default class Pattern {
 	 * @return unwrapped and flattened array or single collection entry instance (if no AND or COMBINE logic used in originalExpression)
 	 */
 	static parseResults(matchObj) {
-		// TODO: return array of objects if query 'expects array', rather than making individual fields arrays
 		let { matches, originalExpression, items } = matchObj;
+
+		if (!matches || !matches.length) return;
+
 		let queryDoesNotExpectArray = originalExpression.indexOf('*') != -1 ? false : originalExpression.split('').reduce((accum, current, idx) => {
 			return accum && !((current == '&' || current == '^') && current == originalExpression[i+1])
 		}, true);
 
-		let o = {};
-		for (let item of items) {
-			if (queryDoesNotExpectArray && matches[0]) {
-				o[item] = matches[0][item];
-			} else {
-				o[item] = [];
-				for (let match of matches) {
-					if (typeof match != "undefined") {
-						o[item].push(match[item]);
-					};
-				}
-			};
-		}
-
-		return o;
+		let toReturn = queryDoesNotExpectArray ? {} : [];
+		if (queryDoesNotExpectArray) {
+			for (let item of items) {
+				toReturn[item] = matches[0][item];
+			}
+		} else {
+			for (let match of matches) {
+				if (typeof match != "undefined") {
+					let matchToReturn = {};
+					for(let item of items) {
+						matchToReturn[item] = match[item];
+					}
+					toReturn.push(matchToReturn);
+				};
+			}
+		};
+		return toReturn;
 	}
 }

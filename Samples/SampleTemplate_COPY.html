@@ -5,11 +5,11 @@
 	<p class="userinfo-username">{{userInfo.username}}</p>
 	<p class="userinfo-profileImage">{{userInfo.profileImage}}</p>
 	<!-- TODO: refactor for entire footerContactInfo field to be an array -->
-	{{#each footerContactInfo.email}}
-		<p class="footerContactInfo-email">{{.}}</p>
+	{{#each footerContactInfo}}
+		<p class="footerContactInfo-email">{{email}}</p>
 	{{/each}}
-	{{#each footerContactInfo.phonenumber}}
-		<p class="footerContactInfo-phonenumber">{{.}}</p>
+	{{#each footerContactInfo}}
+		<p class="footerContactInfo-phonenumber">{{phonenumber}}</p>
 	{{/each}}
 </body>
 </html>
