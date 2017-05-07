@@ -47,4 +47,22 @@ export default {
 			"user": "John", // sample design defines 'user' endpoint to match with 'name' field (uniqueByItem)
 		}
 	},
+	getSampleCollectionEntry(collectionName, option1) {
+		if (collectionName == "UsersTest") {
+			
+			return {
+				name: "John",
+			}
+
+		} else if(collectionName == "GeneralInfoTest") {
+			
+			const firstChar = option1.toString()[0];
+			return {
+				key: option1, // should be a unique number
+				phonenumber: "416444${firstChar}${firstChar}${firstChar}${firstChar}",
+				email: (Math.random() < 0.5 ? "fdsa@asdf.com" : undefined),
+			}
+			
+		};
+	}
 };

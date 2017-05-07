@@ -119,22 +119,13 @@ RouteTest.addTest(function() {
 		assert.falsey(route.getFileWithPattern(TestPattern), 'getFileWithPattern method does not return undefined when there is no data matching given pattern.');
 
 		//TODO: move to TestHelpers
-		UsersTest.insert({
-			name: "John",
-		});
+		UsersTest.insert(TestHelpers.getSampleCollectionEntry('UsersTest'));
 
 		assert.truthy(fs.existsSync(route.getFileWithPattern(TestPattern)), 'getFileWithPattern does not return file path for partial model data existing in Collections');
 
 		//TODO: move to TestHelpers
-		GeneralInfoTest.insert({
-			"key": 1,
-			"phonenumber": "4164443333",
-		});
-		GeneralInfoTest.insert({
-			"key": 2,
-			"email": "fdsa@asdf.com",
-			"phonenumber": "4164442222",
-		});
+		GeneralInfoTest.insert(TestHelpers.getSampleCollectionEntry('GeneralInfoTest', 1));
+		GeneralInfoTest.insert(TestHelpers.getSampleCollectionEntry('GeneralInfoTest', 2));
 
 		assert.truthy(fs.existsSync(route.getFileWithPattern(TestPattern)), 'getFileWithPattern does not return file path for all model data existing in Collections');
 
