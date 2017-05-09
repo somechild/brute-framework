@@ -20,7 +20,7 @@ export default class Page {
 		this.contextHasChanged = true;
 
 		this.getFile(); // force creation of a file
-		
+
 		this._id = uuid();
 		let insertionAttempts = maxAttempts;
 		while(!Weaver.insert(this) && insertionAttempts --> 0)
@@ -70,7 +70,7 @@ export default class Page {
 			if (!template) throw new Error(`Page with id ${this.id} does not belong to a container.`);
 			template = template.getTemplate();
 			let processor = new TemplateProcessor(template);
-			
+
 			fs.writeFileSync(filePath, processor.processWith(this.context));
 
 			this.contextHasChanged = false;

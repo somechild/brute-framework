@@ -14,6 +14,8 @@ export default class BatchRunner {
 		this.wrapper = wrapper;
 		this.wrapperRunArgs = Array.isArray(wrapperArgs) ? wrapperArgs: [];
 		this.processes = [];
+		this.preProcesses = [];
+		this.postProcesses = [];
 	}
 
 	/**
@@ -30,22 +32,59 @@ export default class BatchRunner {
 	}
 
 	/**
+	 * @param method: function - method to run after each process runs
+	 * @throws Error if invalid param
+	 */
+	queueAfterEach(method) {
+		if (typeof method != "function")
+			throw new Error(`BatchRunner.queueAfterEach(): param ${method} should be a function.`);
+		this.postProcesses.push(method);
+	}
+
+	/**
+	 * @param method: function - method to run before each process runs
+	 * @throws Error if invalid param
+	 */
+	queueBeforeEach(method) {
+		if (typeof method != "function")
+			throw new Error(`BatchRunner.queueBeforeEach(): param ${method} should be a function.`);
+		this.preProcesses.push(method);
+	}
+
+	/**
 	 * run the queued processes
 	 */
 	run() {
 		if (typeof this.wrapper != "undefined") {
 			for (let processItem of this.processes) {
+				BatchRunner._runProcessList(this.preProcesses);
 				const {isSuccess, message} = processItem.main();
 				if (isSuccess) {
 					processItem.success();
 				} else {
 					processItem.failed(message);
 				};
+				BatchRunner._runProcessList(this.postProcesses);
 			}
 		} else {
 			for (let processItem of this.processes) {
+				BatchRunner._runProcessList(this.preProcesses);
 				processItem();
+				BatchRunner._runProcessList(this.postProcesses);
 			}
 		};
+	}
+
+	/**
+	 * NOTE: no validation for this as it's private
+	 * @param list: [function] - list of functions to run
+	 * @return Array: array of return values of each method (if method does not return anything, an 'undefined' placeholder will be pushed into array)
+	 */
+	static _runProcessList(processList) {
+		let results = [];
+		for (let method of processList) {
+			results.push(method());
+		}
+		return results;
 	}
 }

@@ -37,6 +37,15 @@ export class Collector {
 	}
 
 	/**
+	 * set global.bruteframework.collections to be an empty object
+	 */
+	static clearSpace() {
+		if(!global.bruteframework)
+			global.bruteframework = {};
+		global.bruteframework.collections = {};
+	}
+
+	/**
 	 * add collection to collection space
 	 * @param instance: object -- instance of Collection to add to space
 	 * @return true if added. false if collection space has not been initialized OR if collection already exists with same name.
@@ -206,6 +215,15 @@ export class Weaver {
 			else return false;
 		}
 		return true;
+	}
+
+	/**
+	 * set global.bruteframework.weaveClasses to be an empty object
+	 */
+	static clearSpace() {
+		if(!global.bruteframework)
+			global.bruteframework = {};
+		global.bruteframework.weaveClasses = {};
 	}
 
 	/**

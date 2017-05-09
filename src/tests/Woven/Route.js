@@ -15,7 +15,7 @@ const _path_ = require('path');
 const SampleTemplatePath = __dirname + '/../../../Samples/SampleTemplate.html';
 const SampleTemplatePath_ALT = __dirname + '/../../../Samples/SampleTemplate_COPY.html'; //because many file-systems like linux's are case sensitive so tests for updating template path cannot simply change casing for updates
 const SampleTemplatePath_INVALID = '^@  12131asdf~4.../asdf/.\/';
-const SampleRouteName = "test";
+const SampleRouteName = 'test';
 
 // create test
 
@@ -25,8 +25,8 @@ const RouteTest = describe({
 });
 
 RouteTest.addTest(function() {
-	let UsersTest = new Collection("UsersTest", TestHelpers.getSampleSchema("UsersTest"), "name");
-	let GeneralInfoTest = new Collection("GeneralInfoTest", TestHelpers.getSampleSchema("GeneralInfoTest"), "key");
+	let UsersTest = new Collection('UsersTest', TestHelpers.getSampleSchema('UsersTest'), 'name');
+	let GeneralInfoTest = new Collection('GeneralInfoTest', TestHelpers.getSampleSchema('GeneralInfoTest'), 'key');
 
 	let sampleDesign = new Design(TestHelpers.getSampleDesign());
 
@@ -43,33 +43,25 @@ RouteTest.addTest(function() {
 
 	// route name tests
 	{
-		assert.equals("test", route.name, "Constructor does not set name correctly.");
+		assert.equals('test', route.name, 'Constructor does not set name correctly.');
 
-		let nameIsImmutabe = false;
-		try {
-			route.name = "restricted";
-		} catch (e) {
-			nameIsImmutabe = true;
-		}
-		assert.truthy(nameIsImmutabe, "name should not be mutable");
+		assert.expectFailure(() => {
+			route.name = 'restricted';
+		}, 'name should not be mutable');
 	}
 
 	// id tests
 	{
-		assert.truthy(typeof route.id == "string" && route.id.length, "A unique ID has not been set automatically in the constructor");
+		assert.truthy(typeof route.id == 'string' && route.id.length, 'A unique ID has not been set automatically in the constructor');
 
-		let idIsImmutabe = false;
-		try {
-			route.id = "restricted";
-		} catch (e) {
-			idIsImmutabe = true;
-		}
-		assert.truthy(idIsImmutabe, "id should not be mutable");
+		assert.expectFailure(() => {
+			route.id = 'restricted';
+		}, 'id should not be mutable');
 	}
 
 	// weaver space existence tests
 	{
-		assert.truthy(Weaver.query('Route', route.id), "Constructor does not insert class into global class space.");
+		assert.truthy(Weaver.query('Route', route.id), 'Constructor does not insert class into global class space.');
 	}
 
 	// relationships with Model and PageContainer tests
@@ -89,14 +81,9 @@ RouteTest.addTest(function() {
 		route.updateTemplate();
 		assert.equals(oldTemplatePath, route.pageContainer.getTemplatePath(), 'Calling updateTemplate without a parameter should not change template path - it is simply used for refresh purposes');
 
-		let fakePathFailure = false;
-		try {
+		assert.expectFailure(() => {
 			route.updateTemplate(SampleTemplatePath_INVALID);
-		} catch(e) {
-			fakePathFailure = true;
-		}
-
-		assert.truthy(fakePathFailure, `Updating route's template path to ${SampleTemplatePath_INVALID} should throw an error.`);
+		}, `Updating route's template path to ${SampleTemplatePath_INVALID} should throw an error.`);
 
 		route.updateTemplate(SampleTemplatePath_ALT);
 
@@ -105,13 +92,9 @@ RouteTest.addTest(function() {
 
 	// get file with pattern test
 	{
-		let patternFailure1 = false;
-		try {
+		assert.expectFailure(() => {
 			route.getFileWithPattern({breakdown: TestHelpers.getSamplePattern()});
-		} catch(e) {
-			patternFailure1 = true;
-		}
-		assert.truthy(patternFailure1, 'getFileWithPattern method should validate for Pattern class');
+		}, 'getFileWithPattern method should validate for Pattern class');
 
 
 		let TestPattern = new Pattern(TestHelpers.getSamplePattern());
@@ -129,10 +112,7 @@ RouteTest.addTest(function() {
 
 	}
 
-	return {
-		isSuccess: collector.errors.length === 0,
-		message: collector.errors.length > 0 ? ('the Route class has experienced the following failures: ' + collector.errors.join('\n') + '\n\n') : null,
-	}
+	return collector.finalize({testedItemName: 'Route class'});
 });
 
 export default RouteTest.finalize();

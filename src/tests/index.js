@@ -9,29 +9,17 @@ import { Collector, Weaver } from '../helpers/utils';
 const fs = require('fs');
 const _path_ = require('path');
 
-
-// initialize global space for framework to operate on
-Weaver.initializeSpace([
-	'Collection',
-	'DataModel',
-	'Design',
-	'Page',
-	'PageContainer',
-	'Pattern',
-	'Route'
-]);
-
-Collector.initializeSpace();
-
-global.bruteframework.configs = { // initialize dummy configs
-	general: {
-		pageStorePath: _path_.normalize(__dirname + "../../../Samples/TestPageDump/"),
-	},
-};
-
 // get tests for 'Woven' and 'helpers' folders
 const weaveProcesses = require('./Woven');
 const helpersProcesses = require('./helpers');
+
+global.bruteframework = { // initialize dummy configs
+	configs: {
+		general: {
+			pageStorePath: _path_.normalize(__dirname + "../../../Samples/TestPageDump/"),
+		},
+	},
+};
 
 // this will run tests
 const runner = new BatchRunner(TestWrapper, [true]); // [true] is to ensure test result reports are verbose
@@ -40,6 +28,26 @@ const runner = new BatchRunner(TestWrapper, [true]); // [true] is to ensure test
 for (let processItem of weaveProcesses.concat(helpersProcesses)) {
 	runner.queue(processItem);
 }
+
+runner.queueBeforeEach(() => {
+	// initialize global space for framework to operate on
+	Weaver.initializeSpace([
+		'Collection',
+		'DataModel',
+		'Design',
+		'Page',
+		'PageContainer',
+		'Pattern',
+		'Route'
+	]);
+
+	Collector.initializeSpace();
+});
+
+runner.queueAfterEach(() => {
+	Weaver.clearSpace();
+	Collector.clearSpace();
+});
 
 // run tests
 runner.run();

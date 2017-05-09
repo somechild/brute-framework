@@ -38,6 +38,16 @@ export class Assertions {
 		};
 	}
 
+	expectFailure(methodToFail, message) {
+		let failed = false;
+		try {
+			methodToFail();
+		} catch(e) {
+			failed = true;
+		}
+		this.truthy(failed, message);
+	}
+
 	/**
 	 * call to have failures result in errors being thrown
 	 * overrides collectErrors
@@ -103,5 +113,12 @@ export class ErrorCollector {
 		else
 			this.messages.forEach((message) => console.log('\x1b[31m', `Error: ${message}`));
 		console.log('\x1b[0m', '\n'); // clear console font color from red
+	}
+
+	finalize(options) {
+		return {
+			isSuccess: this.errors.length === 0,
+			message: this.errors.length > 0 ? (`the ${options.testedItemName} test has experienced the following failures: ` + this.errors.join('\n') + '\n\n') : null,
+		}
 	}
 }
