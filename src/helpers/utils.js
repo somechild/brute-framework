@@ -1,9 +1,10 @@
 import { ExpressionEvaluator, EntryWrapper } from './ExpressionEvaluator';
 import Collection from '../Woven/Collection';
 
-const uuid = require('uuid')
 const cheerio = require('cheerio');
+const fs = require('fs');
 const handlebars = require('handlebars');
+const uuid = require('uuid');
 
 /** Objects & Classes **/
 /**
@@ -303,6 +304,35 @@ export function easymerge() {
 	}
 	return toRet;
 }
+
+
+/**
+ * recursively delete all files in a directory (and its subdirectories)
+ * @param dirPath: string - path to directory
+ * @throws Error if invalid param or if dir does not exist at specified path
+ */
+export function emptyDir(dirPath) { // empty dir method
+	if (typeof dirPath != "string" || !fs.existsSync(dirPath))
+		throw new Error(`Invalid dirPath param: ${dirPath}. Either the param is not a string or a folder does not exist at specified path.`);
+	fs.readdir(dirPath, (err, files) => {
+		if (err) return console.log(err);
+		if (!files.length) return;
+
+		files.forEach((file) => {
+			const filePath = dirPath + file;
+			fs.stat(filePath, (err, stats) => {
+				if (err) return console.log(err);
+				if (stats.isFile()) {
+					fs.unlink(filePath, (err) => { if(err) console.log(err); });
+				} else if (stats.isDirectory()) {
+					emptyDir(filePath + '/');
+				}
+			});
+
+		});
+	});
+};
+
 
 /**
  * find an object in an array by property

@@ -4,9 +4,8 @@
  */
 import BatchRunner from './BatchRunner';
 import TestWrapper from './TestWrapper';
-import { Collector, Weaver } from '../helpers/utils';
+import { Collector, Weaver, emptyDir } from '../helpers/utils';
 
-const fs = require('fs');
 const _path_ = require('path');
 
 // get tests for 'Woven' and 'helpers' folders
@@ -54,27 +53,5 @@ runner.run();
 
 
 // clean up file dump after tests complete
-
-function emptyDir(dirPath) { // empty dir method
-	fs.readdir(dirPath, (err, files) => {
-		if (err) return console.log(err);
-		if (!files.length) return;
-
-		files.forEach((file) => {
-			const filePath = dirPath + file;
-			fs.stat(filePath, (err, stats) => {
-				if (err) return console.log(err);
-				if (stats.isFile()) {
-					fs.unlink(filePath, (err) => { if(err) console.log(err); });
-				} else if (stats.isDirectory()) {
-					emptyDir(filePath + '/');
-				}
-			});
-
-		});
-	});
-};
-
-// call emptyDir on page dump folder for tests
 const pathToClear = global.bruteframework.configs.general.pageStorePath;
 emptyDir(pathToClear);
