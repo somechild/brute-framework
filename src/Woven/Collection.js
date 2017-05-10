@@ -83,6 +83,9 @@ export default class Collection {
 	 * @return deleted entry or undefined
 	 */
 	remove(key, value) {
+		if (typeof key != "string")
+			throw new Error(`Invalid key: ${key}. This param must be a string of the property to match value with`);
+		
 		if (key === this.indexingProp) {
 			return this.entries.delete(value);
 		} else {
@@ -164,7 +167,7 @@ export default class Collection {
 			}
 			return returner;
 		};
-		return multi && [];
+		return;
 	}
 
 	/**
@@ -197,9 +200,11 @@ export default class Collection {
 		const validTypes = new Set(["string", "object", "number", "boolean", "[string]", "[object]", "[number]", "[boolean]" /*, not used: "symbol", "function"*/]);
 		for (let prop in schema) {
 			let propDefinition = schema[prop];
+			if (typeof propDefinition != "object" || Array.isArray(propDefinition))
+				return false;
 			if (!validTypes.has(propDefinition.type))
 				return false;
-			if (propDefinition.required !== true && propDefinition.required !== false && propDefinition.required !== undefined)
+			if (typeof propDefinition.required !== "boolean" && typeof propDefinition.required !== "undefined")
 				return false;
 			if (typeof propDefinition.defaultValue != "undefined" && !validTypes.has(typeof propDefinition.defaultValue))
 				return false;

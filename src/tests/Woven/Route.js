@@ -31,8 +31,8 @@ RouteTest.addTest(function() {
 	let sampleDesign = new Design(TestHelpers.getSampleDesign());
 
 	let assert = new Assertions();
-	let collector = new ErrorCollector();
-	assert.collectErrors(collector);
+	let errorCollector = new ErrorCollector();
+	assert.collectErrors(errorCollector);
 
 	// constructor test
 
@@ -112,7 +112,7 @@ RouteTest.addTest(function() {
 
 	}
 
-	return collector.finalize({testedItemName: 'Route class'});
+	return errorCollector.finalize({testedItemName: 'Route class'});
 });
 
 export default RouteTest.finalize();
