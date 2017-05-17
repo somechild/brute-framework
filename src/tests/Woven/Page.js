@@ -1,7 +1,8 @@
+import Page from '../../Woven/Page';
 import DataModel from '../../Woven/DataModel';
-import Design from '../../Woven/Design';
-import Route from '../../Woven/Route';
+import Design from './Design';
 import Pattern from '../../Woven/Pattern';
+import Route from './Route';
 import describe from '../describe';
 
 //aux
@@ -10,12 +11,12 @@ import TestHelpers from '../TestHelpers';
 import { Weaver } from '../../helpers/utils';
 
 // create test
-const DataModelTest = describe({
-	testName: 'DataModel class tests', 
-	testedFilePath: (__dirname + '../../Woven/DataModel'),
+const PageTest = describe({
+	testName: 'Page class tests', 
+	testedFilePath: (__dirname + '../../Woven/Page'),
 });
 
-DataModelTest.addTest(function() {
+PageTest.addTest(function() {
 	let assert = new Assertions();
 	let errorCollector = new ErrorCollector();
 	assert.collectErrors(errorCollector);
@@ -25,26 +26,19 @@ DataModelTest.addTest(function() {
 	// constructor tests
 	{
 
-		
 	}
 
-	// update and get design
+	// recomputeData test
 	{
 
 	}
 
-	// update and get route
+	// getFile test
 	{
 
 	}
 
-	// getDataInstance tests
-	{
-		
-	}
-
-
-	return errorCollector.finalize({testedItemName: 'DataModel class'});
+	return errorCollector.finalize({testedItemName: 'Page class'});
 });
 
-export default DataModelTest.finalize();
+export default PageTest.finalize();

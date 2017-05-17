@@ -26,123 +26,11 @@ export class ExpressionEvaluator {
 	 */
 	static evaluate(expr, matchKey, collectionContext) {
 		let parsedExpr = this.parseBrackets(expr);
-		if (typeof parsedExpr == "string") return this.simple(parsedExpr, matchKey, collectionContext);
-		return this.compoundEvalLoop(parsedExpr, matchKey, collectionContext);
+		if (typeof parsedExpr == "string") return this.simpleExpressionEval(parsedExpr, matchKey, collectionContext);
+		return this.compoundExpressionEvalLoop(parsedExpr, matchKey, collectionContext);
 	}
 
 	/** private methods **/
-
-	/**
-	 * evaluate an expression with no brackets
-	 * @param expr: String - simple expression
-	 * @param key: String - key to match expression against
-	 * @param collectionContext: Collection - collection to search in
-	 * @return Array with result of expression searched in collection 
-	 */
-	static simple(expr, key, collectionContext) {
-		let breakdown = [], tempstr = "";
-		for (let i = 0; i < expr.length; i++) {
-			if ((expr[i] == '&' || expr[i] == '|' || expr[i] == '^') && expr[i] == expr[i+1]) {
-				if (tempstr.length) {
-					breakdown.push(tempstr);
-					tempstr = "";
-				};
-				breakdown.push(expr[i] + expr[i+1]);
-				i++;
-			} else {
-				tempstr += expr[i];
-			};
-		};
-
-		if (tempstr.length) { // this should always be true
-			breakdown.push(tempstr);
-			tempstr = "";
-		} else {
-			throw new Error(`Invalid! Expression ends in logical operator: ${expr}`);
-		};
-
-		let toRet = [];
-		for (let item of breakdown) {
-			if (item != '&&' && item != '||' && item != '^^') {
-				const entry = new EntryWrapper(collectionContext.find({ [key]: item }));
-				if (typeof entry.value != "undefined") {
-					toRet.push(entry);
-				};
-			} else {
-				toRet.push(item);
-			};
-
-			if (toRet.length == 3) {
-				toRet = this.collapseLogic(toRet);
-			};
-		}
-		if (toRet.length == 3) return this.collapseLogic(toRet);
-		return toRet;
-	}
-
-	/**
-	 * loop to recursively evaluate an expression broken down into arrays and sub-arrays
-	 * @param parsedExpression: Array - string expression with brackets broken down into arrays and sub-arrays
-	 * @param key: key to match expression against
-	 * @param collectionContext: collection to search in
-	 * @return Array with results of expression evaluated and searched within collection
-	 */
-	static compoundEvalLoop(parsedExpression, key, collectionContext) {
-		let evaluated = [];
-		for (let item of parsedExpression) {
-			if (evaluated.length == 3) {
-				evaluated = this.collapseLogic(evaluated);
-			};
-
-			if (typeof item == "string") {
-				if (item == '&&' || item == '||' || item == '^^') {
-					evaluated.push(item);
-				} else {
-					evaluated.push(this.simple(item, key, collectionContext));
-				};
-			} else { // it's an array
-				evaluated.push(this.compoundEvalLoop(item, key, collectionContext));
-			};
-		}
-		if (evaluated.length == 3)
-				return this.collapseLogic(evaluated);
-		return evaluated;
-	}
-
-	/**
-	 * collapse a logic array into an array with a single item or no items
-	 	-> for cases of AND and COMBINE which reduce to a single array, if items are arrays, they will be merged
-		-> if you do not want arrays merged, wrap them in an EntryWrapper object
-	 * AND Ex.
-	 		[undefined, "&&", {"name": "joe"}] --> []
-	 		[[], "&&", "joe"] --> []
-	 		[[undefined], "&&", "joe"] --> []
-	 		[ "jane", "&&", "joe"] --> [["jane", "joe"]]
-	 		[["jane", "joe"], "&&", "jack"] --> [["jane", "joe", "jack"]]
-	 		[["jane", "joe"], "&&", ["jack", "jill"]] --> [["jane", "joe", "jack", "jill"]]
-	 * OR Ex.
-	 		[undefined, "||", {"name": "joe"}] --> [{"name": "joe"}]
-	 		["jane", "||", "joe"] --> ["jane"]
-	 * COMBINE Ex.
-	 		[undefined, "^^", {"name": "joe"}] --> [{"name": "joe"}]
-	 		["jane", "^^", "joe"] --> [["jane", "joe"]]
-	 		["jane", "^^", ["joe", "jack"]] --> [["jane", "joe", "jack"]]
-	 * @param logicArray: Array - 3-element array of form [item1, logicalExpressionString, item2]
-	 *		--> logicalExpressionString: '&&' is logical AND, '||' is logical OR, '^^' is a combining operation (combines all defined items)
-	 * @return empty array if logical AND is not true. array with first elemnt being an array of items if ^^ or && used. array with either item1 or item2 as the first element if || used.
-	 */
-	static collapseLogic(logicArray) {
-		let collapsed;
-		const first = checkNotEmptyIfArray(logicArray[0]), second = checkNotEmptyIfArray(logicArray[2]);
-		if (logicArray[1] == '^^' || (logicArray[1]  == '&&' && first && second)) {
-			collapsed = [easymerge(logicArray[0], logicArray[2])];
-		} else if(logicArray[1] == '||' && (first || second)) {
-			collapsed = [first? easymerge(logicArray[0]): easymerge(logicArray[2])];
-		} else {
-			collapsed = [];
-		};
-		return collapsed;
-	}
 
 	/**
 	 * recursively parse string with brackets to an array with nested arrays for sub-expressions (break down to simplest of expressions)
@@ -203,5 +91,117 @@ export class ExpressionEvaluator {
 			tempStr = '';
 		};
 		return isCompound? breakdown: str;
+	}
+
+	/**
+	 * loop to recursively evaluate an expression broken down into arrays and sub-arrays
+	 * @param parsedExpression: Array - string expression with brackets broken down into arrays and sub-arrays
+	 * @param key: key to match expression against
+	 * @param collectionContext: collection to search in
+	 * @return Array with results of expression evaluated and searched within collection
+	 */
+	static compoundExpressionEvalLoop(parsedExpression, key, collectionContext) {
+		let evaluated = [];
+		for (let item of parsedExpression) {
+			if (evaluated.length == 3) {
+				evaluated = this.collapseLogic(evaluated);
+			};
+
+			if (typeof item == "string") {
+				if (item == '&&' || item == '||' || item == '^^') {
+					evaluated.push(item);
+				} else {
+					evaluated.push(this.simpleExpressionEval(item, key, collectionContext));
+				};
+			} else { // it's an array
+				evaluated.push(this.compoundExpressionEvalLoop(item, key, collectionContext));
+			};
+		}
+		if (evaluated.length == 3)
+				return this.collapseLogic(evaluated);
+		return evaluated;
+	}
+
+	/**
+	 * evaluate an expression with no brackets
+	 * @param expr: String - simple expression
+	 * @param key: String - key to match expression against
+	 * @param collectionContext: Collection - collection to search in
+	 * @return Array with result of expression searched in collection 
+	 */
+	static simpleExpressionEval(expr, key, collectionContext) {
+		let breakdown = [], tempstr = "";
+		for (let i = 0; i < expr.length; i++) {
+			if ((expr[i] == '&' || expr[i] == '|' || expr[i] == '^') && expr[i] == expr[i+1]) {
+				if (tempstr.length) {
+					breakdown.push(tempstr);
+					tempstr = "";
+				};
+				breakdown.push(expr[i] + expr[i+1]);
+				i++;
+			} else {
+				tempstr += expr[i];
+			};
+		};
+
+		if (tempstr.length) { // this should always be true
+			breakdown.push(tempstr);
+			tempstr = "";
+		} else {
+			throw new Error(`Invalid! Expression ends in logical operator: ${expr}`);
+		};
+
+		let toRet = [];
+		for (let item of breakdown) {
+			if (item != '&&' && item != '||' && item != '^^') {
+				const entry = new EntryWrapper(collectionContext.find({ [key]: item }));
+				if (typeof entry.value != "undefined") {
+					toRet.push(entry);
+				};
+			} else {
+				toRet.push(item);
+			};
+
+			if (toRet.length == 3) {
+				toRet = this.collapseLogic(toRet);
+			};
+		}
+		if (toRet.length == 3) return this.collapseLogic(toRet);
+		return toRet;
+	}
+
+	/**
+	 * collapse a logic array into an array with a single item or no items
+	 	-> for cases of AND and COMBINE which reduce to a single array, if items are arrays, they will be merged
+		-> if you do not want arrays merged, wrap them in an EntryWrapper object
+	 * AND Ex.
+	 		[undefined, "&&", {"name": "joe"}] --> []
+	 		[[], "&&", "joe"] --> []
+	 		[[undefined], "&&", "joe"] --> []
+	 		[ "jane", "&&", "joe"] --> [["jane", "joe"]]
+	 		[["jane", "joe"], "&&", "jack"] --> [["jane", "joe", "jack"]]
+	 		[["jane", "joe"], "&&", ["jack", "jill"]] --> [["jane", "joe", "jack", "jill"]]
+	 * OR Ex.
+	 		[undefined, "||", {"name": "joe"}] --> [{"name": "joe"}]
+	 		["jane", "||", "joe"] --> ["jane"]
+	 * COMBINE Ex.
+	 		[undefined, "^^", {"name": "joe"}] --> [{"name": "joe"}]
+	 		["jane", "^^", "joe"] --> [["jane", "joe"]]
+	 		["jane", "^^", ["joe", "jack"]] --> [["jane", "joe", "jack"]]
+	 * @param logicArray: Array - 3-element array of form [item1, logicalExpressionString, item2]
+	 *		--> logicalExpressionString: '&&' is logical AND, '||' is logical OR, '^^' is a combining operation (combines all defined items)
+	 * @return empty array if logical AND is not true. array with first elemnt being an array of items if ^^ or && used. array with either item1 or item2 as the first element if || used.
+	 */
+	static collapseLogic(logicArray) {
+		let collapsed;
+		const first = checkNotEmptyIfArray(logicArray[0]), second = checkNotEmptyIfArray(logicArray[2]);
+		if (logicArray[1] == '^^' || (logicArray[1]  == '&&' && first && second)) {
+			collapsed = [easymerge(logicArray[0], logicArray[2])];
+		} else if(logicArray[1] == '||' && (first || second)) {
+			collapsed = [first? easymerge(logicArray[0]): easymerge(logicArray[2])];
+		} else {
+			collapsed = [];
+		};
+		return collapsed;
 	}
 }

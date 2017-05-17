@@ -1,4 +1,4 @@
-import { Collector, unwrap, Weaver } from '../helpers/utils';
+import { Collector, parseResults, unwrap, Weaver } from '../helpers/utils';
 import { maxWovenInsertionAttempts as maxAttempts } from '../helpers/constants';
 
 import Design from './Design';
@@ -91,7 +91,7 @@ export default class DataModel {
 
 			hasSomeResults = true;
 			
-			toReturn[sectionName] = Pattern.parseResults({
+			toReturn[sectionName] = parseResults({
 				matches,
 				originalExpression: query[section.uniqueByItem],
 				items: section.items,

@@ -377,6 +377,40 @@ export function getSafe(o, str, executeOnSuccess) {
 }
 
 /**
+ * parses results from CollectionQuerier (ExpressionEvaluator), based on an original match expression for inserting into properties of a data instance of DataModel & required items for this section as per design requirements
+ * --> data instances will later be used by handlebars on the HTML templates
+ * @param matchObj: object{matches, originalExpression, items} - matches is an Array of results retrieved from CollectionQuerier, originalExpression is a string with the expression used to retrieve aforementioned matches, items is an array of names of required properties to retrieve from the collection
+ * @return unwrapped and flattened array or single collection entry instance (if no AND or COMBINE logic used in originalExpression)
+ */
+export function parseResults(matchObj) {
+	let { matches, originalExpression, items } = matchObj;
+
+	if (!matches || !matches.length) return;
+
+	let queryDoesNotExpectArray = originalExpression.indexOf('*') != -1 ? false : originalExpression.split('').reduce((accum, current, idx) => {
+		return accum && !((current == '&' || current == '^') && current == originalExpression[i+1])
+	}, true);
+
+	let toReturn = queryDoesNotExpectArray ? {} : [];
+	if (queryDoesNotExpectArray) {
+		for (let item of items) {
+			toReturn[item] = matches[0][item];
+		}
+	} else {
+		for (let match of matches) {
+			if (typeof match != "undefined") {
+				let matchToReturn = {};
+				for(let item of items) {
+					matchToReturn[item] = match[item];
+				}
+				toReturn.push(matchToReturn);
+			};
+		}
+	};
+	return toReturn;
+}
+
+/**
  * prints a string with line breaks above and below
  * @param str: item to print
  */

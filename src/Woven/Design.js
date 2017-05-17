@@ -9,7 +9,7 @@ export default class Design {
 
 	static getRequiredItems() {
 		return {
-			requiredProps: ["collection", "items"], // generally required
+			requiredProps: ["collection", "items"], // required for all designs
 
 			dynamicRequiredProps: ["endpoint"], // for dynamic fields (defined by route queries)
 			staticRequiredProps: ["matchPattern"], // for staticly defined fields (predefined in design)
@@ -34,12 +34,12 @@ export default class Design {
 
 	}
 
-	get layout() {
-		return this.design;
-	}
-
 	get id() {
 		return this._id;
+	}
+
+	get layout() {
+		return this.design;
 	}
 
 	/**

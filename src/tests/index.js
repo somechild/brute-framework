@@ -37,7 +37,7 @@ runner.queueBeforeEach(() => {
 		'Page',
 		'PageContainer',
 		'Pattern',
-		'Route'
+		'Route',
 	]);
 
 	Collector.initializeSpace();
