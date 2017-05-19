@@ -82,13 +82,16 @@ export default class Collection {
 	/**
 	 * remove entry from collection
 	 * NOTE: removal would be quicker if key is the unique indexing property
-	 * @param key: key to match value with
-	 * @param value: value to match against
+	 * @param queryObject: has 1 key/value pair to match entries with
 	 * @return list of deleted entries or empty list
 	 */
-	remove(key, value) {
+	remove(queryObject) {
+		if (typeof queryObject != "object" || Array.isArray(queryObject))
+			throw new Error(`Invalid queryObject: ${queryObject}: This param must be an object with 1 key/value pair to match entries with.`);
+		const key = Object.keys(queryObject)[0];
+		const value = queryObject[key];
 		if (typeof key != "string")
-			throw new Error(`Invalid key: ${key}. This param must be a string of the property to match value with`);
+			throw new Error(`Invalid key: ${key}. This must be a string of the property to match value with`);
 		
 		let listOfRemovedEntries = [];
 		if (key === this.indexingProp) {
@@ -162,7 +165,7 @@ export default class Collection {
 	 */ 
 	_get(key, value, multi) {
 		if (key === this.indexingProp) {
-			return multi? (this.entries.get(value) && [this.entries.get(value)]): this.entries.get(value);
+			return multi? ((typeof this.entries.get(value) != "undefined" || undefined) && [this.entries.get(value)]): this.entries.get(value);
 		} else {
 			let returner = multi && [];
 			const entries = this.entries.entries();
@@ -173,7 +176,7 @@ export default class Collection {
 					returner.push(entry[1]);
 				}
 			}
-			return returner;
+			return (returner.length || undefined) && returner;
 		};
 		return;
 	}

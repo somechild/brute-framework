@@ -133,10 +133,10 @@ CollectionTest.addTest(function() {
 				UsersTest.remove(() => 'foo');
 			}, 'Invalid key for remove method should result in error.');
 			// invalid remove returns undefined
-			assert.falsey(UsersTest.remove('foo', 'bar').length, 'key/value pair with no matches in collection should result in empty list return in remove method.');
+			assert.falsey(UsersTest.remove({'foo': 'bar'}).length, 'key/value pair with no matches in collection should result in empty list return in remove method.');
 
 			// remove with unique indexing prop
-			assert.equals(JaneDoeEntry, UsersTest.remove('name', 'Jane Doe')[0], 'Removing an entry should return the removed entry.');
+			assert.equals(JaneDoeEntry, UsersTest.remove({'name': 'Jane Doe'})[0], 'Removing an entry should return the removed entry.');
 
 			// remove with non-unique indexing prop (with multiple entry instances)
 			UsersTest.insert({
@@ -157,28 +157,58 @@ CollectionTest.addTest(function() {
 			assert.truthy(deepMatch(
 				usernameAsfooEntries.sort((a, b) => {
 					return a.name - b.name;
-				}), UsersTest.remove('username', 'foo').sort((a, b) => {
+				}), UsersTest.remove({'username': 'foo'}).sort((a, b) => {
 					return a.name - b.name;
 				})
 			), 'Removing with a key/value pair that matches multiple entries should return all matching entries');
 
-			const usernamesAsfooEmptyEntries = unwrap( querier.in('UsersTest').find({username: 'foo'}) );
+			const usernamesAsfooEmptyEntries = querier.in('UsersTest').find({username: 'foo'}); // should be undefined
 			assert.falsey( usernamesAsfooEmptyEntries.length , 'remove method does not remove all entries with matching key/value pair' );
 	}
 
 	// find query tests
 	{
 		// findOne (make queries with indexbyprops and also with other props)
+			const JohnRoeObj = {
+				"name": "John Roe",
+				"username": "foo",
+				"profileImage": "bar",
+			};
+			const JaneDoeObj = {
+				"name": "Jane Doe",
+				"username": "foo",
+				"profileImage": "baz",
+			};
+			UsersTest.insert(JohnRoeObj);
+			UsersTest.insert(JaneDoeObj);
+
 			// success with one response
+			assert.truthy(deepMatch(JohnRoeObj, UsersTest.findOne({name: "John Roe"})), 'findOne should return a single entry match with given query object.');
+
 			// success with one response even though multiple entries exist
+			assert.truthy(deepMatch(JohnRoeObj, UsersTest.findOne({username:"foo"})) || deepMatch(JaneDoeObj, UsersTest.findOne({username: "foo"})) , 'findOne should return a single entry match with given query object (even if there are multiple matching entries.');
+
 			// fail with undefined
+			assert.falsey(UsersTest.findOne({name: "foo"}), 'Query object with no matches should cause findOne to result in undefined.');
+
 		// find (make queries with indexbyprops and also with other props)
 			// success with one response still wrapped in array
+			assert.equals(1, unwrap( UsersTest.find({name: "John Roe"}) ).length, 'find method with single match should return match in an array');
+
 			// success with multi response
-			// fail with undefined rather than empty array
+			assert.truthy(unwrap( UsersTest.find({username: "foo"}) ).length > 1, 'find method with multiple match should return matches in an array');
+
+			// fail with undefined
+			assert.falsey(UsersTest.find({name: "John"}), 'find method with no match should return undefined');
+
 		// findall
-			// success with empty array
+
 			// success with all responses
+			assert.equals(2, UsersTest.findAll().length, 'findAll should return array of all entries');
+
+			// success with empty array
+			UsersTest.remove({'username': 'foo'});
+			assert.equals(0, UsersTest.findAll().length, 'findAll should return empty array if collection has no entries');
 	}
 
 
