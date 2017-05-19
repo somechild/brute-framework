@@ -84,7 +84,7 @@ export default class DataModel {
 			let query = {};
 			query[section.uniqueByItem] = section.matchPattern || pattern.breakdown[section.endpoint];
 			
-			let matches = querier.with(section.collection).find(query);
+			let matches = querier.in(section.collection).find(query);
 			if (!matches || !matches.length)
 				continue;
 			matches = unwrap(matches);

@@ -20,12 +20,14 @@ export default {
 		return itemName == "UsersTest" ? {
 			"name": {
 				type: "string",
+				required: true,
 			},
 			"username": {
 				type: "string",
 			},
 			"profileImage": {
 				type: "string",
+				defaultValue: "https://memecrunch.com/meme/BRPAM/you-funny-mofo/image.png?w=400&c=1",
 			}
 		} : {
 			"email": {
@@ -39,7 +41,7 @@ export default {
 			"key": {
 				type: "number",
 				required: true,
-			}
+			},
 		};
 	},
 	getSamplePattern() { // conforming to sample design
@@ -64,5 +66,5 @@ export default {
 			}
 			
 		};
-	}
+	},
 };

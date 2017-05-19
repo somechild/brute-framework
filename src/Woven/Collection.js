@@ -3,6 +3,8 @@ import { Collector } from '../helpers/utils';
 const uuid = require('uuid');
 const extend = require('util')._extend;
 
+const VALID_TYPES = ["string", "object", "number", "boolean", "[string]", "[object]", "[number]", "[boolean]" /*, not used: "symbol", "function"*/]; // for field definitions in schema
+
 export default class Collection {
 	/**
 	 * @param name: unique name for collection
@@ -72,7 +74,9 @@ export default class Collection {
 		if (!Collection.validateAgainstSchema(o, this))
 			throw new Error(`Invalid insertion item. ${o}`);
 		const key = o[this.indexingProp];
-		return this.entries.set(key, this._fillDefaultValues(o));
+		const old = this.entries.get(key);
+		this.entries.set(key, this._fillDefaultValues(o));
+		return old;
 	}
 
 	/**
@@ -80,22 +84,26 @@ export default class Collection {
 	 * NOTE: removal would be quicker if key is the unique indexing property
 	 * @param key: key to match value with
 	 * @param value: value to match against
-	 * @return deleted entry or undefined
+	 * @return list of deleted entries or empty list
 	 */
 	remove(key, value) {
 		if (typeof key != "string")
 			throw new Error(`Invalid key: ${key}. This param must be a string of the property to match value with`);
 		
+		let listOfRemovedEntries = [];
 		if (key === this.indexingProp) {
-			return this.entries.delete(value);
+			listOfRemovedEntries.push(this.entries.get(value));
+			this.entries.delete(value);
 		} else {
 			const entries = this.entries.entries();
 			for (let entry of entries) {
-				if (entry[0] == key && entry[1] == value)
-					return this.entries.delete(entry[this.indexingProp]);
+				if (entry[1][key] == value) {
+					listOfRemovedEntries.push(entry[1]);
+					this.entries.delete(entry[0]);
+				}
 			}
 		};
-		return;
+		return listOfRemovedEntries;
 	}
 
 	/*
@@ -205,7 +213,7 @@ export default class Collection {
 			return false;
 		};
 		
-		const validTypes = new Set(["string", "object", "number", "boolean", "[string]", "[object]", "[number]", "[boolean]" /*, not used: "symbol", "function"*/]);
+		const validTypes = new Set(VALID_TYPES);
 		let requiredItems = requiredProps.reduce((accum, itemName) => {
 			accum[itemName] = true;
 			return accum;
@@ -219,7 +227,7 @@ export default class Collection {
 				return false;
 			if (typeof propDefinition.required !== "boolean" && typeof propDefinition.required !== "undefined")
 				return false;
-			if (typeof propDefinition.defaultValue != "undefined" && !validTypes.has(typeof propDefinition.defaultValue))
+			if (typeof propDefinition.defaultValue != "undefined" && typeof propDefinition.defaultValue != propDefinition.type)
 				return false;
 			if (prop in requiredItems) {
 				delete requiredItems[prop];

@@ -98,7 +98,7 @@ class CollectionQuerier {
 	 * @throws Error if collection with name of 'collectionName' does not exist
 	 * @return self for method chaining
 	 */
-	with(collectionName) {
+	in(collectionName) {
 		let collection;
 		if (typeof collectionName != "string" || !(collection = getSafe(global, `bruteframework.collections.${collectionName}`)))
 			throw new Error("Collection with name '${collectionName}' does not exist.")
@@ -270,6 +270,7 @@ export function checkNotEmptyIfArray(o)  {
 /**
  * match multiple objects by individual property
  * @params: objects to compare
+ * @return true if they match by property
  */
 export function deepMatch() {
 	for(let i = 1; arguments[i]; i++) {

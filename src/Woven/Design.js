@@ -60,7 +60,7 @@ export default class Design {
 		for (let prop in newDesign) {
 			const descriptionItem = newDesign[prop];	
 			if (typeof descriptionItem.uniqueByItem == "undefined") {
-				const uniqueBy = Collector.getQuerier().with(descriptionItem.collection).getContext().indexingProp; // should not throw error as we just validated existence of associated Collection instance in 'Design.validate(this)''
+				const uniqueBy = Collector.getQuerier().in(descriptionItem.collection).getContext().indexingProp; // should not throw error as we just validated existence of associated Collection instance in 'Design.validate(this)''
 				newDesign[prop].uniqueByItem = uniqueBy;
 			}
 		}
@@ -100,7 +100,7 @@ export default class Design {
 			let CollectionExists = true;
 			let collectionItem = Collector.getQuerier();
 			try {
-				collectionItem.with(descriptionItem.collection); // throws error if collection with name in param does not exist
+				collectionItem.in(descriptionItem.collection); // throws error if collection with name in param does not exist
 			} catch(e) {
 				CollectionExists = false;
 			}
