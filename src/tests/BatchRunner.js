@@ -58,11 +58,11 @@ export default class BatchRunner {
 		if (typeof this.wrapper != "undefined") {
 			for (let processItem of this.processes) {
 				BatchRunner._runProcessList(this.preProcesses);
-				const {isSuccess, message} = processItem.main();
+				const {testedItemName, isSuccess, failureMessage} = processItem.main();
 				if (isSuccess) {
-					processItem.success();
+					processItem.success(testedItemName);
 				} else {
-					processItem.failed(message);
+					processItem.failed(testedItemName, failureMessage);
 				};
 				BatchRunner._runProcessList(this.postProcesses);
 			}

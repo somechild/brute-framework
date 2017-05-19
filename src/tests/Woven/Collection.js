@@ -4,11 +4,11 @@ import describe from '../describe';
 //aux
 import { Assertions, ErrorCollector } from '../assertions';
 import TestHelpers from '../TestHelpers';
-import { Weaver } from '../../helpers/utils';
+import { Collector } from '../../helpers/utils';
 
 // create test
 const CollectionTest = describe({
-	testName: 'Collection class tests', 
+	testName: 'Collection class tests',
 	testedFilePath: (__dirname + '../../Woven/Collection'),
 });
 
@@ -21,13 +21,31 @@ CollectionTest.addTest(function() {
 
 	// constructor tests
 	{
-		
+		// check UsersTest setup correctly
+		assert.equals('UsersTest', UsersTest.name, 'Constructor does not set the name correctly.');
+		assert.equals('name', UsersTest.indexingProp, 'Constructor sets indexingProp incorrectly.');
+		assert.truthy(UsersTest.entries instanceof Map, 'Constructor does not initialize entires map.');
+		assert.truthy(UsersTest.id.length, 'Constructor does not initialize id.');
+		assert.equals(UsersTest, Collector.getQuerier().with('UsersTest').getContext(), 'Constructor does not insert collection into global space using collector.');
+
 		// schema fail
+		assert.expectFailure(() => {
+			let UsersBadSchema = new Collection("UsersTest2", {}, "foo");
+		}, 'Collection constructor should validate schema.');
 		
 		// indexByProp fails
-		
+		assert.expectFailure(() => {
+			let UsersBad = new Collection("UsersTest2", TestHelpers.getSampleSchema("UsersTest"));
+		}, 'Missing indexByProp param for constructor should throw an error.');
+		assert.expectFailure(() => {
+			let UsersBad = new Collection("UsersTest2", TestHelpers.getSampleSchema("UsersTest"), "foo");
+		}, 'If indexByProp param in constructor is not defined in schema, constructor should throw an error.');
+
 		// name duplicate fail
-		
+		assert.expectFailure(() => {
+			let UsersDupe = new Collection("UsersTest", TestHelpers.getSampleSchema("UsersTest"), "name");
+		}, 'Collection constructor should not allow duplicate names');
+
 	}
 
 

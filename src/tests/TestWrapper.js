@@ -17,19 +17,22 @@ export default class TestWrapper {
 		return '../';
 	}
 
-
-	success() {
+	/**
+	 * @param testedItemName: name of item tested
+	 */
+	success(testedItemName) {
 		if (this.isVerbose) {
-			console.log('\x1b[32m', `${this.testpath}\n${this.testname} completed successfully.`);
+			console.log('\x1b[32m', `${this.testpath}\n${this.testname} for ${testedItemName} completed successfully.`);
 			console.log('\x1b[0m', '\n');
 		};
 	}
 
 	/**
-	 * @message: returned message of failed test
+	 * @param testedItemName: name of item tested
+	 * @param message: returned message of failed test
 	 */
-	failed(message) {
-		console.log('\x1b[31m', `${this.testpath}\n${this.testname} failed`);
+	failed(testedItemName, message) {
+		console.log('\x1b[31m', `${this.testpath}\n${this.testname} for ${testedItemName} failed`);
 		if (this.isVerbose) {
 			console.log('\x1b[31m',' with message:\n');
 			console.log('\x1b[31m', message);

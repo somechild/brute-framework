@@ -15,10 +15,10 @@ export default class Collection {
 	constructor(name, schema, indexByProp) {
 		this.$name = name;
 
-		this._setSchema(schema);
 		if (!indexByProp || !indexByProp.length)
 			throw new Error(`Invalid indexByProp: ${indexByProp}. It should be a valid string naming the field that every entry is unique by.`);
 		this.indexingProp = indexByProp;
+		this._setSchema(schema);
 		this.entries = new Map();
 		
 		this._id = uuid();
@@ -105,7 +105,7 @@ export default class Collection {
 	 * @return old schema
 	 */
 	_setSchema(schema) {
-		if(!Collection.validateSchema(schema)) throw new Error(`Invalid schema: ${schema}`);
+		if(!Collection.validateSchema(schema, [this.indexingProp])) throw new Error(`Invalid schema: ${schema}`);
 
 		const old = this.schema;
 		this.schema = schema;
@@ -192,12 +192,25 @@ export default class Collection {
 		NOTE:
 			> valid types are: 'string', 'object', 'boolean', 'number'
 			> types can be wrapped in arrays using square bracket wrappers (EX. '[string]')
+	 * @param requiredProps: optional [String] - list of fields required to be defined in schema
 	 * @return true if valid
 	 */
-	static validateSchema(schema) {
-		if (typeof schema != "object" && !Array.isArray(schema))
+	static validateSchema(schema, requiredProps = []) {
+		if (typeof schema != "object" && !Array.isArray(schema)) {
 			return false;
+		};
+		if (!Array.isArray(requiredProps) || requiredProps.reduce((accum, str) => {
+			return accum || typeof str != "string";
+		}, false)) {
+			return false;
+		};
+		
 		const validTypes = new Set(["string", "object", "number", "boolean", "[string]", "[object]", "[number]", "[boolean]" /*, not used: "symbol", "function"*/]);
+		let requiredItems = requiredProps.reduce((accum, itemName) => {
+			accum[itemName] = true;
+			return accum;
+		}, {}); // copy array into object for quick match and to ensure original param is not mutatedf
+
 		for (let prop in schema) {
 			let propDefinition = schema[prop];
 			if (typeof propDefinition != "object" || Array.isArray(propDefinition))
@@ -208,8 +221,11 @@ export default class Collection {
 				return false;
 			if (typeof propDefinition.defaultValue != "undefined" && !validTypes.has(typeof propDefinition.defaultValue))
 				return false;
+			if (prop in requiredItems) {
+				delete requiredItems[prop];
+			};
 		};
-		return true;
+		return Object.keys(schema).length > 0 && Object.keys(requiredItems).length === 0;
 	}
 
 	/**

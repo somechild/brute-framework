@@ -118,7 +118,8 @@ export class ErrorCollector {
 	finalize(options) {
 		return {
 			isSuccess: this.errors.length === 0,
-			message: this.errors.length > 0 ? (`the ${options.testedItemName} test has experienced the following failures: ` + this.errors.join('\n') + '\n\n') : null,
+			failureMessage: this.errors.length > 0 ? (`the ${options.testedItemName} test has experienced the following failures: ` + this.errors.join('\n') + '\n\n') : null,
+			testedItemName: options.testedItemName,
 		}
 	}
 }
