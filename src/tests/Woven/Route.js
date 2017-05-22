@@ -25,15 +25,14 @@ const RouteTest = describe({
 });
 
 RouteTest.addTest(function() {
-	let UsersTest = new Collection('UsersTest', TestHelpers.getSampleSchema('UsersTest'), 'name');
-	let GeneralInfoTest = new Collection('GeneralInfoTest', TestHelpers.getSampleSchema('GeneralInfoTest'), 'key');
-
-	let sampleDesign = new Design(TestHelpers.getSampleDesign());
-
 	let assert = new Assertions();
 	let errorCollector = new ErrorCollector();
 	assert.collectErrors(errorCollector);
 
+	let UsersTest = new Collection('UsersTest', TestHelpers.getSampleSchema('UsersTest'), 'name');
+	let GeneralInfoTest = new Collection('GeneralInfoTest', TestHelpers.getSampleSchema('GeneralInfoTest'), 'key');
+
+	let sampleDesign = new Design(TestHelpers.getSampleDesign());
 	// constructor test
 
 	let route = new Route(sampleDesign, {

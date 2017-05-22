@@ -1,9 +1,9 @@
-import { Collector, parseResults, unwrap, Weaver } from '../helpers/utils';
-import { maxWovenInsertionAttempts as maxAttempts } from '../helpers/constants';
-
 import Design from './Design';
 import Route from './Route';
 import Pattern from './Pattern';
+
+import { Collector, parseResults, unwrap, Weaver } from '../helpers/utils';
+import { maxWovenInsertionAttempts as maxAttempts } from '../helpers/constants';
 
 const uuid = require('uuid');
 
@@ -16,7 +16,7 @@ export default class DataModel {
 	constructor(design, route) {
 		if (route instanceof Route) {
 			this.$routeId = route.id;
-		};
+		} else if(route) throw new Error(`Route object is invalid.`);
 
 		this.design = design;
 		

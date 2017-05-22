@@ -1,6 +1,12 @@
 export default {
-	getSampleDesign() {
-		return {
+	getSampleDesign(toggler) {
+		return toggler? {
+			"users": {
+				"collection": "UsersTest",
+				"items": ["name"],
+				"matchPattern": "*",
+			}
+		} : {
 			"userInfo": {
 				"collection": "UsersTest",
 				"uniqueByItem": "name", // optional (mainly here for reference purposes) should be the unique indexing prop defined in associated Collection
