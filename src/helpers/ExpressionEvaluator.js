@@ -26,6 +26,7 @@ export class ExpressionEvaluator {
 	 */
 	static evaluate(expr, matchKey, collectionContext) {
 		let parsedExpr = this.parseBrackets(expr);
+
 		if (typeof parsedExpr == "string") return this.simpleExpressionEval(parsedExpr, matchKey, collectionContext);
 		return this.compoundExpressionEvalLoop(parsedExpr, matchKey, collectionContext);
 	}
@@ -131,6 +132,7 @@ export class ExpressionEvaluator {
 	 */
 	static simpleExpressionEval(expr, key, collectionContext) {
 		let breakdown = [], tempstr = "";
+
 		for (let i = 0; i < expr.length; i++) {
 			if ((expr[i] == '&' || expr[i] == '|' || expr[i] == '^') && expr[i] == expr[i+1]) {
 				if (tempstr.length) {
@@ -151,11 +153,12 @@ export class ExpressionEvaluator {
 			throw new Error(`Invalid! Expression ends in logical operator: ${expr}`);
 		};
 
+
 		let toRet = [];
 		for (let item of breakdown) {
 			if (item != '&&' && item != '||' && item != '^^') {
 				const entry = new EntryWrapper(collectionContext.find({ [key]: item }));
-				if (typeof entry.value != "undefined") {
+				if (breakdown.length > 1 || (breakdown.length == 1 && typeof entry.value != "undefined")) {
 					toRet.push(entry);
 				};
 			} else {
@@ -166,7 +169,7 @@ export class ExpressionEvaluator {
 				toRet = this.collapseLogic(toRet);
 			};
 		}
-		if (toRet.length == 3) return this.collapseLogic(toRet);
+		if (toRet.length == 3) return this.collapseLogic(toRet, true);
 		return toRet;
 	}
 
@@ -190,9 +193,10 @@ export class ExpressionEvaluator {
 	 		["jane", "^^", ["joe", "jack"]] --> [["jane", "joe", "jack"]]
 	 * @param logicArray: Array - 3-element array of form [item1, logicalExpressionString, item2]
 	 *		--> logicalExpressionString: '&&' is logical AND, '||' is logical OR, '^^' is a combining operation (combines all defined items)
+	 * @param final: if true, placeholder 'undefined' will not be placed
 	 * @return empty array if logical AND is not true. array with first elemnt being an array of items if ^^ or && used. array with either item1 or item2 as the first element if || used.
 	 */
-	static collapseLogic(logicArray) {
+	static collapseLogic(logicArray, final) {
 		let collapsed;
 		const first = checkNotEmptyIfArray(logicArray[0]), second = checkNotEmptyIfArray(logicArray[2]);
 		if (logicArray[1] == '^^' || (logicArray[1]  == '&&' && first && second)) {
@@ -200,7 +204,7 @@ export class ExpressionEvaluator {
 		} else if(logicArray[1] == '||' && (first || second)) {
 			collapsed = [first? easymerge(logicArray[0]): easymerge(logicArray[2])];
 		} else {
-			collapsed = [];
+			collapsed = final? []: [new EntryWrapper(undefined)];
 		};
 		return collapsed;
 	}

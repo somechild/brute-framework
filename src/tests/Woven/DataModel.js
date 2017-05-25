@@ -9,7 +9,7 @@ import describe from '../describe';
 //aux
 import { Assertions, ErrorCollector } from '../assertions';
 import TestHelpers from '../TestHelpers';
-import { Weaver } from '../../helpers/utils';
+import { deepMatch, Weaver } from '../../helpers/utils';
 
 // create test
 const DataModelTest = describe({
@@ -70,6 +70,8 @@ DataModelTest.addTest(function() {
 		dataModel.design = sampleDesign2;
 		assert.equals(sampleDesign2, dataModel.design, 'Design setter does not work correctly.');
 
+		//reset
+		dataModel.design = sampleDesign;
 	}
 
 	// update and get route
@@ -80,11 +82,15 @@ DataModelTest.addTest(function() {
 
 		assert.equals(route, dataModel.route, 'Route getter on DataModel does not work correctly.');
 
+		const route2OldModel = route2.model;
 		route2.modelId = dataModel.id; // override
 		dataModel.route = route2;
 
 		assert.equals(route2, dataModel.route, 'Setting a new valid route does not work correctly.');
 
+		//reset
+		dataModel.route = route;
+		route2.modelId = route2OldModel.id;
 	}
 
 	// getDataInstance tests
@@ -108,40 +114,97 @@ DataModelTest.addTest(function() {
 			"name": "Fob",
 		});
 		
+		let result;
+		let expected;
+		let typeCheck;
 		let pattern = new Pattern({
-			"userInfo": "John^^Jane",
+			"user": "John^^Jane",
 		});
-
+		
 		// test
+		result = dataModel.getDataInstance(pattern);
+		expected = ['John', 'Jane'];
+
+		typeCheck = Array.isArray(result.userInfo);
+		assert.truthy(typeCheck, 'getDataInstance does not return results of simple ^^ operator query correctly');
+		if(typeCheck) {
+			assert.equals(expected.length, result.userInfo.length, 'getDataInstance does not return results of simple ^^ operator query correctly');
+			assert.truthy(
+					result.userInfo.reduce( (accum, current) => { return accum && expected.indexOf(current.name) != -1; }, true ),
+					'getDataInstance does not return results of simple ^^ operator query correctly'
+				);
+		};
+
 
 		pattern = new Pattern({
-			"userInfo": "John&&Jane&&Joe",
+			"user": "John&&Jane&&Joe",
 		});
 
 		// test
+		result = dataModel.getDataInstance(pattern);
+		expected = undefined;
+
+
+		assert.equals(expected, result.userInfo, 'getDataInstance does not return results of chained && operator query correctly');
 
 		pattern = new Pattern({
-			"userInfo": "Julia||Jake",
+			"user": "Julia||Jake||Knob",
 		});
 
 		// test
+		result = dataModel.getDataInstance(pattern);
+		expected = 'Knob';
+
+		typeCheck = typeof result.userInfo == 'object' && !Array.isArray(result.userInfo);
+		assert.truthy(typeCheck, 'getDataInstance does not return results of chained || operator query correctly');
+		if(typeCheck) {
+			assert.equals(
+					expected,
+					result.userInfo.name,
+					'getDataInstance does not return results of chained || operator query correctly'
+				);
+		};
 
 		pattern = new Pattern({
-			"userInfo": "Jordan||(Joe&&Rob)",
+			"user": "Jordan||{{Joe&&Rob}}^^Fob",
 		});
 
 		// test
+		result = dataModel.getDataInstance(pattern);
+		expected = ['Fob'];
+
+		typeCheck = Array.isArray(result.userInfo);
+		assert.truthy(typeCheck, 'getDataInstance does not return results of compound operator query correctly');
+		if(typeCheck) {
+			assert.equals(expected.length, result.userInfo.length, 'getDataInstance does not return results of compound operator query correctly');
+			assert.truthy(
+					result.userInfo.reduce( (accum, current) => { return accum && expected.indexOf(current.name) != -1; }, true ),
+					'getDataInstance does not return results of compound operator query correctly'
+				);
+		};
 
 		pattern = new Pattern({
-			"userInfo": "Jordan^^(Joe||Rob)^^Bob",
+			"user": "Jordan^^{{{{Joe||Rob}}^^{{Bob&&Jane}}}}",
 		});
 
 		// test
+		result = dataModel.getDataInstance(pattern);
+		expected = ['Rob', 'Bob', 'Jane'];
+
+		typeCheck = Array.isArray(result.userInfo);
+		assert.truthy(typeCheck, 'getDataInstance does not return results of compound nested operator query correctly');
+		if(typeCheck) {
+			assert.equals(expected.length, result.userInfo.length, 'getDataInstance does not return results of compound nested operator query correctly');
+			assert.truthy(
+					result.userInfo.reduce( (accum, current) => { return accum && expected.indexOf(current.name) != -1; }, true ),
+					'getDataInstance does not return results of compound nested operator query correctly'
+				);
+		};
 
 		GeneralInfoTest.insert(TestHelpers.getSampleCollectionEntry('GeneralInfoTest', 1));
 
 		// test
-
+		result = dataModel.getDataInstance(pattern);
 
 	}
 

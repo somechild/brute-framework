@@ -99,7 +99,7 @@ RouteTest.addTest(function() {
 		let TestPattern = new Pattern(TestHelpers.getSamplePattern());
 
 		assert.falsey(route.getFileWithPattern(TestPattern), 'getFileWithPattern method does not return undefined when there is no data matching given pattern.');
-
+		
 		UsersTest.insert(TestHelpers.getSampleCollectionEntry('UsersTest'));
 
 		assert.truthy(fs.existsSync(route.getFileWithPattern(TestPattern)), 'getFileWithPattern does not return file path for partial model data existing in Collections');

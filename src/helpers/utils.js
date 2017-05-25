@@ -124,7 +124,7 @@ class CollectionQuerier {
 			let expression = queryObj[key];
 			if (expression == '*') {
 				return this.context.findAll();
-			} else {
+			} else if(typeof expression != "undefined") {
 				return ExpressionEvaluator.evaluate(expression, key, this.context);
 			};
 		};
@@ -261,10 +261,11 @@ export class Weaver {
  * @return true if o is an array and consists of values that are not all undefined
  */
 export function checkNotEmptyIfArray(o)  {
-	if (o && Array.isArray(o)) {
-		return o.length && o.reduce((accum, cur) => accum || (typeof cur != "undefined"), false);
+	let check = o instanceof EntryWrapper? o.value : o;
+	if (check && Array.isArray(check)) {
+		return check.length && check.reduce((accum, cur) => accum || (typeof cur != "undefined"), false);
 	};
-	return o;
+	return check;
 }
 
 /**
@@ -385,11 +386,11 @@ export function getSafe(o, str, executeOnSuccess) {
  */
 export function parseResults(matchObj) {
 	let { matches, originalExpression, items } = matchObj;
-
+	
 	if (!matches || !matches.length) return;
 
 	let queryDoesNotExpectArray = originalExpression.indexOf('*') != -1 ? false : originalExpression.split('').reduce((accum, current, idx) => {
-		return accum && !((current == '&' || current == '^') && current == originalExpression[i+1])
+		return accum && !((current == '&' || current == '^') && current == originalExpression[idx+1])
 	}, true);
 
 	let toReturn = queryDoesNotExpectArray ? {} : [];
